@@ -88,8 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Hash password
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-        // Prepare insert statement
-        $stmt = $conn->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)");
         if ($stmt) {
             $stmt->bind_param("sss", $username, $email, $hashed_password);
 
