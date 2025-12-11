@@ -1,66 +1,22 @@
 <?php
-// register.php - User registration form and processing
-require_once 'db_connect.php';
+// register.php
+session_start();
 
-// Initialize variables
-$username = $email = $password = $confirm_password = '';
-$username_err = $email_err = $password_err = $confirm_err = $general_err = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Validate username
-    if (empty(trim($_POST['username']))) {
-        $username_err = 'Please enter a username.';
-    } else {
-        $username = trim($_POST['username']);
-    }
-
-    // Validate email
-    if (empty(trim($_POST['email']))) {
-        $email_err = 'Please enter an email.';
-    } elseif (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
-        $email_err = 'Invalid email format.';
-    } else {
-        $email = trim($_POST['email']);
-    }
-
-    // Validate password
-    if (empty($_POST['password'])) {
-        $password_err = 'Please enter a password.';
-    } elseif (strlen($_POST['password']) < 6) {
-        $password_err = 'Password must be at least 6 characters.';
-    } else {
-        $password = $_POST['password'];
-    }
-
-    // Validate confirm password
-    if (empty($_POST['confirm_password'])) {
-        $confirm_err = 'Please confirm your password.';
-    } else {
-        $confirm_password = $_POST['confirm_password'];
-        if ($password !== $confirm_password) {
-            $confirm_err = 'Passwords do not match.';
-        }
-    }
-
-    // If no validation errors, insert into database
-    if (empty($username_err) && empty($email_err) && empty($password_err) && empty($confirm_err)) {
-        $stmt = $conn->prepare('INSERT INTO users (username, email, password) VALUES (?, ?, ?)');
-        if ($stmt) {
-            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            $stmt->bind_param('sss', $username, $email, $hashed_password);
-            if (!$stmt->execute()) {
-                $general_err = 'Database error: ' . $stmt->error;
-            } else {
-                // Registration successful, redirect to login or home
-                header('Location: login.php');
-                exit();
-            }
-            $stmt->close();
-        } else {
-            $general_err = 'Prepare failed: ' . $conn->error;
-        }
-    }
+// CSRF token generation
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
+
+// Retrieve errors or old data from session if they exist
+$errors = $_SESSION['errors'] ?? [];
+$form_data = $_SESSION['form_data'] ?? [];
+$success_message = $_SESSION['success_message'] ?? '';
+
+// Clear session variables so they don't persist on refresh
+unset($_SESSION['errors'], $_SESSION['form_data'], $_SESSION['success_message']);
+
+$username = $form_data['username'] ?? '';
+$email = $form_data['email'] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -110,9 +66,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 4px;
         }
 
-        .error {
+        .error-msg {
             color: #d93025;
             font-size: 0.9em;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .success-msg {
+            color: #155724;
+            background-color: #d4edda;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
         }
 
         button {
@@ -135,32 +101,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <div class="container">
         <h2>Create Account</h2>
-        <?php if (!empty($general_err)): ?>
-            <p class="error"><?php echo htmlspecialchars($general_err); ?></p>
+
+        <?php if (!empty($success_message)): ?>
+            <div class="success-msg"><?php echo htmlspecialchars($success_message); ?></div>
         <?php endif; ?>
-        <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post">
+
+        <?php if (!empty($errors)): ?>
+            <div class="error-msg">
+                <?php foreach ($errors as $err): ?>
+                    <p><?php echo htmlspecialchars($err); ?></p>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+
+        <form action="register_process.php" method="post">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" name="username" id="username" value="<?php echo htmlspecialchars($username); ?>"
                     required>
-                <?php if (!empty($username_err)): ?><span
-                        class="error"><?php echo $username_err; ?></span><?php endif; ?>
             </div>
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" name="email" id="email" value="<?php echo htmlspecialchars($email); ?>" required>
-                <?php if (!empty($email_err)): ?><span class="error"><?php echo $email_err; ?></span><?php endif; ?>
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
                 <input type="password" name="password" id="password" required>
-                <?php if (!empty($password_err)): ?><span
-                        class="error"><?php echo $password_err; ?></span><?php endif; ?>
             </div>
             <div class="form-group">
                 <label for="confirm_password">Confirm Password</label>
                 <input type="password" name="confirm_password" id="confirm_password" required>
-                <?php if (!empty($confirm_err)): ?><span class="error"><?php echo $confirm_err; ?></span><?php endif; ?>
             </div>
             <button type="submit">Register</button>
         </form>
