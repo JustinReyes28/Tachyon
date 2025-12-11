@@ -99,16 +99,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header("Location: login.php");
                 exit();
             } else {
-                $detailed_error = "[" . date('Y-m-d H:i:s') . "] Request ID: " . $requestId . " | Insert User Error: " . $stmt->error . PHP_EOL;
-                file_put_contents(__DIR__ . '/private_logs/db_errors.log', $detailed_error, FILE_APPEND);
-                error_log('Database error (insert user) [' . $requestId . ']');
+                // Ensure log directory exists
+                $log_dir = __DIR__ . '/private_logs';
+                $log_file = $log_dir . '/db_errors.log';
+                if (!is_dir($log_dir)) {
+                    if (!mkdir($log_dir, 0750, true)) {
+                        error_log("Failed to create secure log directory: " . $log_dir);
+                    }
+                }
+
+                // Write generic redaction to file
+                $redacted_message = "[" . date('Y-m-d H:i:s') . "] Request ID: " . $requestId . " | DB Insert Error" . PHP_EOL;
+                if (file_put_contents($log_file, $redacted_message, FILE_APPEND) === false) {
+                    error_log("Failed to write to secure log file: " . $log_file);
+                }
+
+                // Log detailed error to system log
+                error_log("Database error (insert user) [" . $requestId . "]: " . $stmt->error);
                 $errors[] = "An internal error occurred. Please try again later.";
             }
             $stmt->close();
         } else {
-            $detailed_error = "[" . date('Y-m-d H:i:s') . "] Request ID: " . $requestId . " | Prepare Insert Error: " . $conn->error . PHP_EOL;
-            file_put_contents(__DIR__ . '/private_logs/db_errors.log', $detailed_error, FILE_APPEND);
-            error_log('Database error (prepare insert) [' . $requestId . ']');
+            // Ensure log directory exists
+            $log_dir = __DIR__ . '/private_logs';
+            $log_file = $log_dir . '/db_errors.log';
+            if (!is_dir($log_dir)) {
+                if (!mkdir($log_dir, 0750, true)) {
+                    error_log("Failed to create secure log directory: " . $log_dir);
+                }
+            }
+
+            // Write generic redaction to file
+            $redacted_message = "[" . date('Y-m-d H:i:s') . "] Request ID: " . $requestId . " | Prepare Insert Error" . PHP_EOL;
+            if (file_put_contents($log_file, $redacted_message, FILE_APPEND) === false) {
+                error_log("Failed to write to secure log file: " . $log_file);
+            }
+
+            // Log detailed error to system log
+            error_log("Database error (prepare insert) [" . $requestId . "]: " . $conn->error);
             $errors[] = "An internal error occurred. Please try again later.";
         }
     }
