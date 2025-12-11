@@ -42,6 +42,6 @@ debug.log.*
 storage/
 public/storage/
 
-# Database info (sensitive)
-database_info.txt
-db_connect.php
+# Database credentials (sensitive)
+.env
+.env.*
