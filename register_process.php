@@ -5,12 +5,18 @@ require_once 'db_connect.php';
 
 // Check if data was submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $errors = [];
+    $requestId = session_id() ?: bin2hex(random_bytes(16));
     // Validate CSRF token
     if (!isset($_POST['csrf_token']) || !isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
         $errors[] = 'Invalid CSRF token.';
         error_log('CSRF token validation failed.');
         $_SESSION['errors'] = $errors;
-        $_SESSION['form_data'] = $_POST;
+        $form_data = $_POST;
+        unset($form_data['csrf_token']);
+        unset($form_data['password']);
+        unset($form_data['confirm_password']);
+        $_SESSION['form_data'] = $form_data;
         header('Location: register.php');
         exit();
     }
@@ -23,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $confirm_password = $_POST['confirm_password'] ?? '';
 
     // Array to hold errors
-    $errors = [];
+
 
     // 2. Validate inputs
     if (empty($username)) {
@@ -92,12 +98,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header("Location: login.php");
                 exit();
             } else {
-                error_log('Database error (insert user) for username=' . $username . ', email=' . $email . ': ' . $stmt->error);
+                error_log('Database error (insert user) [' . $requestId . ']');
                 $errors[] = "An internal error occurred. Please try again later.";
             }
             $stmt->close();
         } else {
-            error_log('Database error (prepare insert) for username=' . $username . ', email=' . $email . ': ' . $conn->error);
+            error_log('Database error (prepare insert) [' . $requestId . ']');
             $errors[] = "An internal error occurred. Please try again later.";
         }
     }
