@@ -5,7 +5,17 @@ require_once 'db_connect.php';
 
 // Check if data was submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
+    // Validate CSRF token
+    if (!isset($_POST['csrf_token']) || !isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        $errors[] = 'Invalid CSRF token.';
+        error_log('CSRF token validation failed.');
+        $_SESSION['errors'] = $errors;
+        $_SESSION['form_data'] = $_POST;
+        header('Location: register.php');
+        exit();
+    }
+    // Rotate token after successful validation
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     // 1. Retrieve and sanitize inputs
     $username = trim($_POST['username'] ?? '');
     $email = trim($_POST['email'] ?? '');
@@ -30,7 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $stmt->close();
         } else {
-            $errors[] = "Database error: " . $conn->error;
+            error_log('Database error (username check): ' . $conn->error);
+            $errors[] = 'An internal database error occurred. Please try again later.';
         }
     }
 
@@ -50,34 +61,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $stmt->close();
         } else {
-            $errors[] = "Database error: " . $conn->error;
+            error_log('Database error (email check): ' . $conn->error);
+            $errors[] = 'An internal database error occurred. Please try again later.';
         }
     }
 
     if (empty($password)) {
         $errors[] = "Password is required.";
-    } elseif (strlen($password) < 6) {
-        $errors[] = "Password must be at least 6 characters long.";
+    } elseif (strlen($password) < 8) {
+        $errors[] = "Password must be at least 8 characters long.";
     }
 
     if ($password !== $confirm_password) {
         $errors[] = "Passwords do not match.";
-    }
-
-    // 3. Check for existing users (optional but recommended)
-    if (empty($errors)) {
-        $stmt_check = $conn->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
-        if ($stmt_check) {
-            $stmt_check->bind_param("ss", $username, $email);
-            $stmt_check->execute();
-            $stmt_check->store_result();
-            if ($stmt_check->num_rows > 0) {
-                $errors[] = "Username or Email already exists.";
-            }
-            $stmt_check->close();
-        } else {
-            $errors[] = "Database error: " . $conn->error;
-        }
     }
 
     // 4. Insert user if no errors
@@ -96,11 +92,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header("Location: login.php");
                 exit();
             } else {
-                $errors[] = "Error registering user: " . $stmt->error;
+                error_log('Database error (insert user) for username=' . $username . ', email=' . $email . ': ' . $stmt->error);
+                $errors[] = "An internal error occurred. Please try again later.";
             }
             $stmt->close();
         } else {
-            $errors[] = "Database connect error: " . $conn->error;
+            error_log('Database error (prepare insert) for username=' . $username . ', email=' . $email . ': ' . $conn->error);
+            $errors[] = "An internal error occurred. Please try again later.";
         }
     }
 
