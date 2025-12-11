@@ -38,27 +38,6 @@ todo-app/
 │   └── schema.sql
 └── README.md          # This file
 ```
-
-## Database Schema
-
-The application uses the following tables:
-
-### Users Table
-- `id`: INT (Primary Key, Auto Increment)
-- `username`: VARCHAR(50) (Unique)
-- `email`: VARCHAR(100) (Unique)
-- `password`: VARCHAR(255) (Hashed)
-- `created_at`: TIMESTAMP
-
-### Todos Table
-- `id`: INT (Primary Key, Auto Increment)
-- `user_id`: INT (Foreign Key)
-- `title`: VARCHAR(255)
-- `description`: TEXT
-- `status`: ENUM('pending', 'completed')
-- `created_at`: TIMESTAMP
-- `updated_at`: TIMESTAMP
-
 ## Setup Instructions
 
 ### Local Development
