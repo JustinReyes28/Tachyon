@@ -1,4 +1,5 @@
 <?php
+//Latest Change 2
 // register_process.php
 session_start();
 require_once 'db_connect.php';
@@ -46,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $stmt->close();
         } else {
-            error_log('Database error (username check): ' . $conn->error);
+            error_log('Database error (username check) [' . $requestId . ']');
             $errors[] = 'An internal database error occurred. Please try again later.';
         }
     }
@@ -67,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $stmt->close();
         } else {
-            error_log('Database error (email check): ' . $conn->error);
+            error_log('Database error (email check) [' . $requestId . ']');
             $errors[] = 'An internal database error occurred. Please try again later.';
         }
     }
@@ -98,11 +99,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header("Location: login.php");
                 exit();
             } else {
+                $detailed_error = "[" . date('Y-m-d H:i:s') . "] Request ID: " . $requestId . " | Insert User Error: " . $stmt->error . PHP_EOL;
+                file_put_contents(__DIR__ . '/private_logs/db_errors.log', $detailed_error, FILE_APPEND);
                 error_log('Database error (insert user) [' . $requestId . ']');
                 $errors[] = "An internal error occurred. Please try again later.";
             }
             $stmt->close();
         } else {
+            $detailed_error = "[" . date('Y-m-d H:i:s') . "] Request ID: " . $requestId . " | Prepare Insert Error: " . $conn->error . PHP_EOL;
+            file_put_contents(__DIR__ . '/private_logs/db_errors.log', $detailed_error, FILE_APPEND);
             error_log('Database error (prepare insert) [' . $requestId . ']');
             $errors[] = "An internal error occurred. Please try again later.";
         }
