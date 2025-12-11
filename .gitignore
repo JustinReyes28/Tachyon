@@ -44,3 +44,4 @@ public/storage/
 
 # Database info (sensitive)
 database_info.txt
+db_connect.php
