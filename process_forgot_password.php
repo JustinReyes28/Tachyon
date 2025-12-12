@@ -34,15 +34,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $token = bin2hex(random_bytes(32));
             $expires_at = date('Y-m-d H:i:s', time() + 3600);
 
-            $updateStmt = $conn->prepare("UPDATE users SET reset_token = ?, reset_token_expires_at = ? WHERE id = ?");
+            $updateStmt = $conn->prepare("UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?");
             if ($updateStmt) {
                 $updateStmt->bind_param("ssi", $token, $expires_at, $userId);
                 if ($updateStmt->execute()) {
-                    // TODO: Send email
-                    // $resetLink = "http://yourdomain.com/reset_password.php?token=$token";
-                    // mail($email, "Password Reset", "Click here to reset: $resetLink");
+                    // Send email using PHPMailer
+                    require_once 'mailer.php';
+                    $resetLink = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/reset_password.php?token=$token";
 
-                    $_SESSION['success_message'] = "If an account exists with that email, a password reset link has been sent.";
+                    if (sendResetEmail($email, $resetLink)) {
+                        $_SESSION['success_message'] = "If an account exists with that email, a password reset link has been sent.";
+                    } else {
+                        // Fallback logging if email fails (for debugging)
+                        $log_dir = __DIR__ . '/private_logs';
+                        if (!is_dir($log_dir))
+                            mkdir($log_dir, 0750, true);
+                        file_put_contents($log_dir . '/email_errors.log', "[" . date('Y-m-d H:i:s') . "] Failed to send to $email" . PHP_EOL, FILE_APPEND);
+                        $_SESSION['success_message'] = "If an account exists with that email, a password reset link has been sent.";
+                    }
                 } else {
                     error_log("DB Error (update reset token): " . $conn->error);
                     $_SESSION['errors'] = ["An error occurred. Please try again."];

@@ -133,7 +133,7 @@ if ($search !== null && strlen($search) > 200) {
 }
 
 // Build dynamic query safely
-$sql = "SELECT id, title AS task, description, status, priority, due_date, created_at, updated_at
+$sql = "SELECT id, task, description, status, priority, due_date, created_at, updated_at
         FROM todos
         WHERE user_id = ?";
 $params = [$user_id];
