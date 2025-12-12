@@ -1,4 +1,4 @@
-Database Name = todo_db
+--Database Name = todo_db
 -- 1. USERS TABLE (Enhanced Security & DATETIME Precision)
 CREATE TABLE users (
     id INT PRIMARY KEY AUTO_INCREMENT,
