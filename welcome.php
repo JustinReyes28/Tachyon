@@ -22,16 +22,18 @@ $username = $_SESSION['username'] ?? 'User';
 </head>
 
 <body>
+    <!-- Dot Matrix Background Pattern -->
+    <div class="dot-pattern"></div>
+
     <div class="auth-body" style="flex: 1;">
         <div class="auth-container text-center">
-            <h1 class="mb-4" style="font-size: 2rem;">🎉 Welcome!</h1>
-            <p class="mb-6" style="color: var(--text-secondary); font-size: 1.1rem;">
-                Hello <strong><?php echo htmlspecialchars($username); ?></strong>, you have successfully logged into the
-                protected area.
+            <h1 class="mb-4" style="font-size: 2.5rem; letter-spacing: 0.15em;">WELCOME</h1>
+            <p class="mb-6" style="font-size: 1rem; opacity: 0.7;">
+                Hello <strong><?php echo htmlspecialchars($username); ?></strong>, you have successfully logged in.
             </p>
             <div style="display: flex; gap: 1rem; justify-content: center;">
-                <a href="dashboard.php" class="btn btn-primary">Go to Dashboard</a>
-                <a href="logout.php" class="btn btn-danger">Logout</a>
+                <a href="dashboard.php" class="btn btn-primary">DASHBOARD</a>
+                <a href="logout.php" class="btn btn-primary">LOGOUT</a>
             </div>
         </div>
     </div>

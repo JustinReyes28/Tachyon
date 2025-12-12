@@ -29,9 +29,12 @@ $username_email = $form_data['username_email'] ?? '';
 </head>
 
 <body>
+    <!-- Dot Matrix Background Pattern -->
+    <div class="dot-pattern"></div>
+
     <div class="auth-body" style="flex: 1;">
         <div class="auth-container">
-            <h2 class="text-center mb-6">Welcome Back</h2>
+            <h2 class="text-center mb-6">LOGIN</h2>
 
             <?php if (!empty($success_message)): ?>
                 <div class="alert alert-success"><?php echo htmlspecialchars($success_message); ?></div>
@@ -62,11 +65,10 @@ $username_email = $form_data['username_email'] ?? '';
                     <label for="password">Password</label>
                     <input type="password" name="password" id="password" required>
                 </div>
-                <button type="submit" class="btn btn-primary btn-block" style="width: 100%;">Login</button>
+                <button type="submit" class="btn btn-primary btn-block">LOGIN</button>
             </form>
-            <p class="text-center mt-4" style="margin-top: 1.5rem; color: var(--text-secondary); font-size: 0.9rem;">
-                Don't have an account? <a href="register.php"
-                    style="color: var(--primary-color); text-decoration: none; font-weight: 600;">Register here</a>
+            <p class="text-center" style="margin-top: 1.5rem; font-size: 0.875rem; letter-spacing: 0.05em;">
+                Don't have an account? <a href="register.php">Register</a>
             </p>
         </div>
     </div>
