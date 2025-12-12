@@ -32,20 +32,21 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 $user_id = $_SESSION['user_id'];
 
 // Get and validate inputs
-$task = trim($_POST['task'] ?? '');
+// Get and validate inputs
+$title = trim($_POST['title'] ?? '');
 $priority = $_POST['priority'] ?? 'medium';
 $due_date = $_POST['due_date'] ?? null;
 
-// Validate task
-if (empty($task)) {
-    $_SESSION['error_message'] = 'Task is required.';
+// Validate title
+if (empty($title)) {
+    $_SESSION['error_message'] = 'Title is required.';
     header('Location: dashboard.php');
     exit();
 }
 
-// Validate task length (prevent extremely long inputs)
-if (strlen($task) > 1000) {
-    $_SESSION['error_message'] = 'Task is too long. Maximum 1000 characters.';
+// Validate title length (match VARCHAR(255))
+if (strlen($title) > 255) {
+    $_SESSION['error_message'] = 'Title is too long. Maximum 255 characters.';
     header('Location: dashboard.php');
     exit();
 }
@@ -57,22 +58,32 @@ if (!in_array($priority, $allowed_priorities)) {
 }
 
 // Validate and sanitize due_date
+$final_due_date = null;
 if (!empty($due_date)) {
     $date_obj = DateTime::createFromFormat('Y-m-d', $due_date);
-    if (!$date_obj || $date_obj->format('Y-m-d') !== $due_date) {
-        $due_date = null;
+    if ($date_obj && $date_obj->format('Y-m-d') === $due_date) {
+        $final_due_date = $due_date;
     }
-} else {
-    $due_date = null;
 }
 
 // Insert todo into database
-$stmt = $conn->prepare("INSERT INTO todos (user_id, task, description, status, priority, due_date) VALUES (?, ?, ?, 'pending', ?, ?)");
+if ($final_due_date !== null) {
+    $sql = "INSERT INTO todos (user_id, title, description, status, priority, due_date) VALUES (?, ?, ?, 'pending', ?, ?)";
+} else {
+    $sql = "INSERT INTO todos (user_id, title, description, status, priority, due_date) VALUES (?, ?, ?, 'pending', ?, NULL)";
+}
+
+$stmt = $conn->prepare($sql);
 
 if ($stmt) {
     // Setting description as empty since it's not in the form
     $description = '';
-    $stmt->bind_param("issss", $user_id, $task, $description, $priority, $due_date);
+
+    if ($final_due_date !== null) {
+        $stmt->bind_param("issss", $user_id, $title, $description, $priority, $final_due_date);
+    } else {
+        $stmt->bind_param("isss", $user_id, $title, $description, $priority);
+    }
 
     if ($stmt->execute()) {
         $_SESSION['success_message'] = 'Task added successfully!';

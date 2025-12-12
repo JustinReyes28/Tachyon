@@ -30,13 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->fetch();
             $stmt->close();
 
-            // Generate token and expiration (1 hour from now)
+            // Generate token (expiration will be set in SQL using MySQL's NOW())
             $token = bin2hex(random_bytes(32));
-            $expires_at = date('Y-m-d H:i:s', time() + 3600);
 
-            $updateStmt = $conn->prepare("UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?");
+            // Use MySQL's NOW() + INTERVAL to ensure consistent timezone
+            $updateStmt = $conn->prepare("UPDATE users SET reset_token = ?, reset_token_expires = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE id = ?");
             if ($updateStmt) {
-                $updateStmt->bind_param("ssi", $token, $expires_at, $userId);
+                $updateStmt->bind_param("si", $token, $userId);
                 if ($updateStmt->execute()) {
                     // Send email using PHPMailer
                     require_once 'mailer.php';

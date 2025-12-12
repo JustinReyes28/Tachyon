@@ -32,11 +32,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Verify token and expiration
+    // Debug: Log the token being checked
+    $log_dir = __DIR__ . '/private_logs';
+    if (!is_dir($log_dir))
+        mkdir($log_dir, 0750, true);
+    file_put_contents($log_dir . '/reset_debug.log', "[" . date('Y-m-d H:i:s') . "] Checking token: " . substr($token, 0, 10) . "...\n", FILE_APPEND);
+
+    // Debug: Check if token exists at all (without expiration check)
+    $debugStmt = $conn->prepare("SELECT id, reset_token, reset_token_expires FROM users WHERE reset_token = ?");
+    $debugStmt->bind_param("s", $token);
+    $debugStmt->execute();
+    $debugResult = $debugStmt->get_result();
+    if ($debugResult->num_rows > 0) {
+        $debugRow = $debugResult->fetch_assoc();
+        // Also get MySQL's NOW() to compare
+        $nowResult = $conn->query("SELECT NOW() as mysql_now");
+        $mysqlNow = $nowResult->fetch_assoc()['mysql_now'];
+        file_put_contents($log_dir . '/reset_debug.log', "[" . date('Y-m-d H:i:s') . "] Token EXISTS for user ID: " . $debugRow['id'] . ", Expires: " . $debugRow['reset_token_expires'] . ", PHP NOW: " . date('Y-m-d H:i:s') . ", MySQL NOW: " . $mysqlNow . "\n", FILE_APPEND);
+    } else {
+        file_put_contents($log_dir . '/reset_debug.log', "[" . date('Y-m-d H:i:s') . "] Token NOT FOUND in database\n", FILE_APPEND);
+    }
+    $debugStmt->close();
+
     $stmt = $conn->prepare("SELECT id FROM users WHERE reset_token = ? AND reset_token_expires > NOW()");
     if ($stmt) {
         $stmt->bind_param("s", $token);
         $stmt->execute();
         $stmt->store_result();
+
+        // Debug: Log the result
+        file_put_contents($log_dir . '/reset_debug.log', "[" . date('Y-m-d H:i:s') . "] With expiration check - Found rows: " . $stmt->num_rows . "\n", FILE_APPEND);
 
         if ($stmt->num_rows > 0) {
             $stmt->bind_result($userId);
