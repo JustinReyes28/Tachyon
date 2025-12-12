@@ -15,58 +15,25 @@ $username = $_SESSION['username'] ?? 'User';
 
 <head>
     <meta charset="UTF-8">
-    <title>Welcome</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .container {
-            background: #fff;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            width: 400px;
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        p {
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        a.logout-btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background: #d93025;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 4px;
-            transition: background 0.3s;
-        }
-
-        a.logout-btn:hover {
-            background: #b02a1e;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - Todo App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <div class="container">
-        <h1>Welcome, <?php echo htmlspecialchars($username); ?>!</h1>
-        <p>You have successfully logged into the protected area.</p>
-        <a href="logout.php" class="logout-btn">Logout</a>
+    <div class="auth-body" style="flex: 1;">
+        <div class="auth-container text-center">
+            <h1 class="mb-4" style="font-size: 2rem;">🎉 Welcome!</h1>
+            <p class="mb-6" style="color: var(--text-secondary); font-size: 1.1rem;">
+                Hello <strong><?php echo htmlspecialchars($username); ?></strong>, you have successfully logged into the
+                protected area.
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <a href="dashboard.php" class="btn btn-primary">Go to Dashboard</a>
+                <a href="logout.php" class="btn btn-danger">Logout</a>
+            </div>
+        </div>
     </div>
 </body>
 

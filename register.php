@@ -23,120 +23,64 @@ $email = $form_data['email'] ?? '';
 
 <head>
     <meta charset="UTF-8">
-    <title>Register</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .container {
-            background: #fff;
-            padding: 20px 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            width: 350px;
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="password"] {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        .error-msg {
-            color: #d93025;
-            font-size: 0.9em;
-            margin-bottom: 10px;
-            display: block;
-        }
-
-        .success-msg {
-            color: #155724;
-            background-color: #d4edda;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 15px;
-        }
-
-        button {
-            width: 100%;
-            padding: 10px;
-            background: #4a90e2;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1em;
-        }
-
-        button:hover {
-            background: #357ab8;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Todo App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <div class="container">
-        <h2>Create Account</h2>
+    <div class="auth-body" style="flex: 1;">
+        <div class="auth-container">
+            <h2 class="text-center mb-6">Create Account</h2>
 
-        <?php if (!empty($success_message)): ?>
-            <div class="success-msg"><?php echo htmlspecialchars($success_message); ?></div>
-        <?php endif; ?>
+            <?php if (!empty($success_message)): ?>
+                <div class="alert alert-success"><?php echo htmlspecialchars($success_message); ?></div>
+            <?php endif; ?>
 
-        <?php if (!empty($errors)): ?>
-            <div class="error-msg">
-                <?php foreach ($errors as $err): ?>
-                    <p><?php echo htmlspecialchars($err); ?></p>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
+            <?php if (!empty($errors)): ?>
+                <div class="alert alert-error">
+                    <?php if (count($errors) === 1): ?>
+                        <?php echo htmlspecialchars($errors[0]); ?>
+                    <?php else: ?>
+                        <ul style="list-style: none;">
+                            <?php foreach ($errors as $err): ?>
+                                <li><?php echo htmlspecialchars($err); ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
 
-        <form action="register_process.php" method="post">
-            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" name="username" id="username" value="<?php echo htmlspecialchars($username); ?>"
-                    required>
-            </div>
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" name="email" id="email" value="<?php echo htmlspecialchars($email); ?>" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" name="password" id="password" required>
-            </div>
-            <div class="form-group">
-                <label for="confirm_password">Confirm Password</label>
-                <input type="password" name="confirm_password" id="confirm_password" required>
-            </div>
-            <button type="submit">Register</button>
-        </form>
-        <p style="margin-top:10px; text-align:center;">Already have an account? <a href="login.php">Login here</a></p>
+            <form action="register_process.php" method="post" class="needs-validation">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" name="username" id="username" value="<?php echo htmlspecialchars($username); ?>"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" name="email" id="email" value="<?php echo htmlspecialchars($email); ?>"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" name="password" id="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <input type="password" name="confirm_password" id="confirm_password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block" style="width: 100%;">Register</button>
+            </form>
+            <p class="text-center mt-4" style="margin-top: 1.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+                Already have an account? <a href="login.php"
+                    style="color: var(--primary-color); text-decoration: none; font-weight: 600;">Login here</a>
+            </p>
+        </div>
     </div>
+    <script src="script.js"></script>
 </body>
 
 </html>
