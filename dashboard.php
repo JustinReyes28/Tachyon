@@ -55,13 +55,16 @@ if ($stmt) {
 </head>
 
 <body>
+    <!-- Dot Matrix Background Pattern -->
+    <div class="dot-pattern"></div>
+
     <div class="dashboard-container">
         <!-- Header -->
         <header class="app-header">
-            <h1 class="app-title">📋 My Tasks</h1>
+            <h1 class="app-title">TACHYON</h1>
             <div class="user-nav">
-                <span class="user-welcome">Welcome, <?php echo htmlspecialchars($username); ?>!</span>
-                <a href="logout.php" class="btn btn-danger btn-sm">Logout</a>
+                <span class="user-welcome"><?php echo htmlspecialchars($username); ?></span>
+                <a href="logout.php" class="btn btn-sm">Logout</a>
             </div>
         </header>
 
@@ -97,7 +100,7 @@ if ($stmt) {
 
         <!-- Add Todo Form -->
         <div class="add-task-card">
-            <h2>➕ Add New Task</h2>
+            <h2>+ NEW TASK</h2>
             <form action="add_todo.php" method="POST" class="mt-4">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                 <div class="task-form-row">
