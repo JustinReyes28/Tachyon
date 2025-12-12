@@ -67,10 +67,12 @@ if (!empty($due_date)) {
 }
 
 // Insert todo into database
-$stmt = $conn->prepare("INSERT INTO todos (user_id, task, status, priority, due_date, created_by, created_at) VALUES (?, ?, 'pending', ?, ?, ?, NOW())");
+$stmt = $conn->prepare("INSERT INTO todos (user_id, title, description, status, priority, due_date) VALUES (?, ?, ?, 'pending', ?, ?)");
 
 if ($stmt) {
-    $stmt->bind_param("isssi", $user_id, $task, $priority, $due_date, $user_id);
+    // Setting description as empty since it's not in the form
+    $description = '';
+    $stmt->bind_param("issis", $user_id, $task, $description, $priority, $due_date);
 
     if ($stmt->execute()) {
         $_SESSION['success_message'] = 'Task added successfully!';

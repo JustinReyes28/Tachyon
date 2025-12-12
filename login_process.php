@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 3. Authenticate
     if (empty($errors)) {
-        $stmt = $conn->prepare("SELECT id, username, password_hash FROM users WHERE username = ? OR email = ?");
+        $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE username = ? OR email = ?");
         if ($stmt) {
             $stmt->bind_param("ss", $username_email, $username_email);
 

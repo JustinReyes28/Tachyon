@@ -87,15 +87,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         // Hash password
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $password_salt = bin2hex(random_bytes(16)); // Generate a random salt for the DB constraint
+        $verification_token = bin2hex(random_bytes(32));
+        $is_verified = 0;
 
-        $stmt = $conn->prepare("INSERT INTO users (username, email, password_hash, password_salt) VALUES (?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO users (username, email, password, is_verified, verification_token) VALUES (?, ?, ?, ?, ?)");
         if ($stmt) {
-            $stmt->bind_param("ssss", $username, $email, $hashed_password, $password_salt);
+            $stmt->bind_param("sssis", $username, $email, $hashed_password, $is_verified, $verification_token);
 
             if ($stmt->execute()) {
+                // TODO: Send verification email
+                // $verifyLink = "http://yourdomain.com/verify_email.php?token=$verification_token";
+                // mail($email, "Verify your email", "Click here: $verifyLink");
+
                 // Success: Redirect to login page
-                $_SESSION['success_message'] = "Registration successful! Please login.";
+                $_SESSION['success_message'] = "Registration successful! Please check your email to verify your account.";
                 header("Location: login.php");
                 exit();
             } else {
