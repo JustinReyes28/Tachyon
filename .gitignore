@@ -48,3 +48,7 @@ public/storage/
 
 # Debug files
 inspect_todos.php
+
+# Database dump files (may contain sensitive data)
+*.sql
+todo_db.sql
