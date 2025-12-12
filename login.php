@@ -34,7 +34,10 @@ $username_email = $form_data['username_email'] ?? '';
 
     <div class="auth-body" style="flex: 1;">
         <div class="auth-container">
-            <h2 class="text-center mb-6">LOGIN</h2>
+            <h1 class="text-center"
+                style="font-size: 2.75rem; font-weight: 1000; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-black); margin-bottom: 30px;">
+                Welcome to Tachyon</h1>
+            <!-- <h2 class="text-center mb-6">LOGIN</h2> -->
 
             <?php if (!empty($success_message)): ?>
                 <div class="alert alert-success"><?php echo htmlspecialchars($success_message); ?></div>

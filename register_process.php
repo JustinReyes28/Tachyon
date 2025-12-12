@@ -90,9 +90,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $verification_token = bin2hex(random_bytes(32));
         $is_verified = 0;
 
-        $stmt = $conn->prepare("INSERT INTO users (username, email, password, is_verified, verification_token) VALUES (?, ?, ?, ?, ?)");
+        $password_salt = ''; // PHP's password_hash() handles salting internally
+        $stmt = $conn->prepare("INSERT INTO users (username, email, password_hash, password_salt, is_verified, verification_token) VALUES (?, ?, ?, ?, ?, ?)");
         if ($stmt) {
-            $stmt->bind_param("sssis", $username, $email, $hashed_password, $is_verified, $verification_token);
+            $stmt->bind_param("ssssis", $username, $email, $hashed_password, $password_salt, $is_verified, $verification_token);
 
             if ($stmt->execute()) {
                 // TODO: Send verification email
