@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'db_connect.php'; // Included to ensure DB connection if needed later, or for consistent styling includes if any
+// Database connection not required for form render; moved to process_forgot_password.php
 // Generate CSRF token
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));

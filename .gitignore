@@ -51,5 +51,9 @@ inspect_todos.php
 
 # Database dump files (may contain sensitive data)
 *.sql
-todo_db.sql
-database_schema.sql
+#todo_db.sql
+#database_schema.sql
+
+# PhpMailer directory
+phpmailer/
+mailer.php

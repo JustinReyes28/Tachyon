@@ -67,7 +67,10 @@ $username_email = $form_data['username_email'] ?? '';
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">LOGIN</button>
             </form>
-            <p class="text-center" style="margin-top: 1.5rem; font-size: 0.875rem; letter-spacing: 0.05em;">
+            <p class="text-center" style="margin-top: 1rem; font-size: 0.875rem;">
+                <a href="forgot_password.php">Forgot Password?</a>
+            </p>
+            <p class="text-center" style="margin-top: 0.5rem; font-size: 0.875rem; letter-spacing: 0.05em;">
                 Don't have an account? <a href="register.php">Register</a>
             </p>
         </div>

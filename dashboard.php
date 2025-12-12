@@ -24,7 +24,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
 
 // Fetch user's todos
 $todos = [];
-$stmt = $conn->prepare("SELECT id, title AS task, description, status, priority, due_date, created_at FROM todos WHERE user_id = ? ORDER BY
+$stmt = $conn->prepare("SELECT id, task, description, status, priority, due_date, created_at FROM todos WHERE user_id = ? ORDER BY
     CASE priority
         WHEN 'high' THEN 1
         WHEN 'medium' THEN 2
