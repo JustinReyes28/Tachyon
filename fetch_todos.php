@@ -133,8 +133,8 @@ if ($search !== null && strlen($search) > 200) {
 }
 
 // Build dynamic query safely
-$sql = "SELECT id, task, description, status, priority, due_date, completed_at, created_at, updated_at 
-        FROM todos 
+$sql = "SELECT id, title AS task, description, status, priority, due_date, created_at, updated_at
+        FROM todos
         WHERE user_id = ?";
 $params = [$user_id];
 $types = "i";
@@ -199,7 +199,6 @@ $todos = [];
 while ($row = $result->fetch_assoc()) {
     // Format dates for JSON
     $row['due_date'] = $row['due_date'] ? date('Y-m-d', strtotime($row['due_date'])) : null;
-    $row['completed_at'] = $row['completed_at'] ? date('c', strtotime($row['completed_at'])) : null;
     $row['created_at'] = date('c', strtotime($row['created_at']));
     $row['updated_at'] = date('c', strtotime($row['updated_at']));
 

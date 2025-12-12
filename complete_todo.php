@@ -39,10 +39,10 @@ if (!$todo_id || $todo_id <= 0) {
 }
 
 // Update todo status - ensuring user ownership (CRITICAL: prevents unauthorized modification)
-$stmt = $conn->prepare("UPDATE todos SET status = 'completed', completed_at = NOW(), updated_by = ? WHERE id = ? AND user_id = ?");
+$stmt = $conn->prepare("UPDATE todos SET status = 'completed' WHERE id = ? AND user_id = ?");
 
 if ($stmt) {
-    $stmt->bind_param("iii", $user_id, $todo_id, $user_id);
+    $stmt->bind_param("ii", $todo_id, $user_id);
 
     if ($stmt->execute()) {
         if ($stmt->affected_rows > 0) {
