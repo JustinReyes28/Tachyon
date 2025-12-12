@@ -87,10 +87,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         // Hash password
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        $password_salt = bin2hex(random_bytes(16)); // Generate a random salt for the DB constraint
 
-        $stmt = $conn->prepare("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO users (username, email, password_hash, password_salt) VALUES (?, ?, ?, ?)");
         if ($stmt) {
-            $stmt->bind_param("sss", $username, $email, $hashed_password);
+            $stmt->bind_param("ssss", $username, $email, $hashed_password, $password_salt);
 
             if ($stmt->execute()) {
                 // Success: Redirect to login page
