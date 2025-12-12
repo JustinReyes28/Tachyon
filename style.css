@@ -649,6 +649,7 @@ select {
     text-align: center;
     padding: var(--space-3xl) var(--space-xl);
     border: 1px dashed var(--color-white);
+    background-color: var(--color-black);
     opacity: 0.6;
 }
 
