@@ -58,4 +58,4 @@ inspect_todos.php
 phpmailer/
 mailer.php
 *.example
-!private_logs/cron_reminders.log
+

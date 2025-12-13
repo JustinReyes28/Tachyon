@@ -117,6 +117,8 @@ try {
 
         .note-date {
             font-size: 0.75rem;
+            color: var(--color-dim);
+            opacity: 1;
         }
 
         .empty-state {

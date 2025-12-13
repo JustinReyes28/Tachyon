@@ -35,6 +35,21 @@ try {
     // Keep 0 if error
     error_log("Error counting notes: " . $e->getMessage());
 }
+
+// Fetch recent notes
+$recent_notes = [];
+try {
+    $stmt = $conn->prepare("SELECT id, title, content, created_at, is_pinned FROM notes WHERE user_id = ? AND is_archived = 0 ORDER BY is_pinned DESC, updated_at DESC LIMIT 3");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+        $recent_notes[] = $row;
+    }
+    $stmt->close();
+} catch (Exception $e) {
+    error_log("Error fetching recent notes: " . $e->getMessage());
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -45,6 +60,89 @@ try {
     <title>Dashboard - Tachyon</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <style>
+        .note-card {
+            background-color: var(--color-white);
+            color: var(--color-black);
+            border: 2px solid var(--color-black);
+            padding: var(--space-lg);
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            position: relative;
+        }
+
+        .note-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 4px 4px 0 var(--color-black);
+        }
+
+        .note-card.pinned {
+            border-color: var(--color-accent);
+            border-width: 3px;
+        }
+
+        .note-card.pinned::before {
+            content: "📌";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .note-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: var(--space-md);
+            color: var(--color-black);
+            word-break: break-word;
+        }
+
+        .note-preview {
+            font-size: 0.95rem;
+            color: var(--color-dim);
+            margin-bottom: var(--space-md);
+            line-height: 1.6;
+            max-height: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .note-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--color-dim);
+            margin-top: var(--space-md);
+            font-family: var(--font-mono);
+        }
+
+        .note-date {
+            font-size: 0.75rem;
+            color: var(--color-dim);
+            opacity: 1;
+        }
+
+        .note-actions {
+            display: flex;
+            gap: var(--space-sm);
+            margin-top: var(--space-sm);
+        }
+
+        .note-action-btn {
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            border: 1px solid var(--color-black);
+            background-color: transparent;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .note-action-btn:hover {
+            background-color: var(--color-black);
+            color: var(--color-white);
+        }
+    </style>
 </head>
 
 <body>
@@ -111,31 +209,86 @@ try {
         <!-- Notes Grid -->
         <section class="notes-section">
             <div class="notes-grid">
-                <div class="note-card">
-                    <h3 class="note-title">Sample Note 1</h3>
-                    <p class="note-preview">This is a preview of your first note content...</p>
-                    <div class="note-meta">
-                        <span class="note-date">Dec 13, 2024</span>
+                <?php if (empty($recent_notes)): ?>
+                    <div class="note-card"
+                        style="text-align: center; justify-content: center; align-items: center; display: flex; color: var(--color-dim);">
+                        <p class="note-preview">No notes found. Create one!</p>
                     </div>
-                </div>
-                <div class="note-card">
-                    <h3 class="note-title">Sample Note 2</h3>
-                    <p class="note-preview">This is a preview of your second note content...</p>
-                    <div class="note-meta">
-                        <span class="note-date">Dec 12, 2024</span>
-                    </div>
-                </div>
-                <div class="note-card">
-                    <h3 class="note-title">Sample Note 3</h3>
-                    <p class="note-preview">This is a preview of your third note content...</p>
-                    <div class="note-meta">
-                        <span class="note-date">Dec 11, 2024</span>
-                    </div>
-                </div>
+                <?php else: ?>
+                    <?php foreach ($recent_notes as $note): ?>
+                        <div class="note-card <?php echo $note['is_pinned'] ? 'pinned' : ''; ?>"
+                            data-note-id="<?php echo $note['id']; ?>">
+                            <h3 class="note-title"><?php echo htmlspecialchars($note['title']); ?></h3>
+                            <div class="note-preview">
+                                <?php
+                                $plainText = strip_tags($note['content']);
+                                $preview = mb_strlen($plainText) > 200 ? mb_substr($plainText, 0, 200) . '...' : $plainText;
+                                echo htmlspecialchars($preview);
+                                ?>
+                            </div>
+                            <div class="note-meta">
+                                <span class="note-date">
+                                    <?php
+                                    $date = new DateTime($note['created_at']); // Using created_at for dashboard as it's "Recent Notes" but logic could swap to updated_at if preferred
+                                    echo $date->format('M j, Y g:i A');
+                                    ?>
+                                </span>
+                            </div>
+                            <div class="note-actions">
+                                <button class="note-action-btn" onclick="viewNote(<?php echo $note['id']; ?>)">View</button>
+                                <button class="note-action-btn" onclick="editNote(<?php echo $note['id']; ?>)">Edit</button>
+                                <button class="note-action-btn" onclick="deleteNote(<?php echo $note['id']; ?>)">Delete</button>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </section>
     </div>
     <script src="script.js"></script>
+    <script>
+        const csrfToken = "<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>";
+
+        function viewNote(noteId) {
+            window.location.href = `view_note.php?id=${noteId}`;
+        }
+
+        function editNote(noteId) {
+            window.location.href = `edit_note.php?id=${noteId}`;
+        }
+
+        function deleteNote(noteId) {
+            if (confirm('Are you sure you want to delete this note?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'delete_note.php';
+
+                const idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.name = 'id';
+                idInput.value = noteId;
+
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrf_token';
+                csrfInput.value = csrfToken;
+
+                form.appendChild(idInput);
+                form.appendChild(csrfInput);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        document.querySelectorAll('.note-card').forEach(card => {
+            card.addEventListener('click', function (e) {
+                if (!e.target.classList.contains('note-action-btn')) {
+                    const noteId = this.dataset.noteId;
+                    viewNote(noteId);
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
