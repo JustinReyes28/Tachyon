@@ -2,6 +2,7 @@
 // dashboard.php - Main dashboard (protected page)
 session_start();
 require_once 'db_connect.php';
+require_once 'includes/functions.php';
 
 // Session protection - redirect if not authenticated
 if (!isset($_SESSION['user_id'])) {
@@ -59,7 +60,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Tachyon</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="<?php echo asset_url('style.css'); ?>">
     <style>
         .note-card {
             background-color: var(--color-white);
@@ -199,12 +200,7 @@ try {
             </a>
         </div>
 
-        <!-- Search Section -->
-        <div class="search-section" style="margin-bottom: var(--space-xl);">
-            <div class="search-field">
-                <input type="text" id="search" name="search" placeholder="[Search...]" class="search-input">
-            </div>
-        </div>
+
 
         <!-- Notes Grid -->
         <section class="notes-section">
@@ -229,8 +225,12 @@ try {
                             <div class="note-meta">
                                 <span class="note-date">
                                     <?php
-                                    $date = new DateTime($note['created_at']); // Using created_at for dashboard as it's "Recent Notes" but logic could swap to updated_at if preferred
-                                    echo $date->format('M j, Y g:i A');
+                                    try {
+                                        $date = new DateTime($note['created_at']); // Using created_at for dashboard as it's "Recent Notes" but logic could swap to updated_at if preferred
+                                        echo $date->format('M j, Y g:i A');
+                                    } catch (Exception $e) {
+                                        echo 'Invalid Date';
+                                    }
                                     ?>
                                 </span>
                             </div>
@@ -245,9 +245,11 @@ try {
             </div>
         </section>
     </div>
-    <script src="script.js"></script>
+    <script src="<?php echo asset_url('script.js'); ?>"></script>
     <script>
         const csrfToken = "<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>";
+
+
 
         function viewNote(noteId) {
             window.location.href = `view_note.php?id=${noteId}`;

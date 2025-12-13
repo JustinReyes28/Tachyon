@@ -7,8 +7,8 @@ require_once 'db_connect.php';
 header('Content-Type: application/json; charset=utf-8');
 
 // Disable caching for dynamic content
-header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-header('Pragma: no-cache');
+// header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+// header('Pragma: no-cache');
 
 // Security headers
 header('X-Content-Type-Options: nosniff');

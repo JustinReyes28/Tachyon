@@ -33,32 +33,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 3. Authenticate
     if (empty($errors)) {
-        $stmt = $conn->prepare("SELECT id, username, password_hash FROM users WHERE username = ? OR email = ?");
+        $stmt = $conn->prepare("SELECT id, username, password_hash, failed_login_attempts, locked_until FROM users WHERE username = ? OR email = ?");
         if ($stmt) {
             $stmt->bind_param("ss", $username_email, $username_email);
 
             if ($stmt->execute()) {
                 $stmt->store_result();
                 if ($stmt->num_rows === 1) {
-                    $stmt->bind_result($id, $db_username, $db_password_hash);
+                    $stmt->bind_result($id, $db_username, $db_password_hash, $failed_login_attempts, $locked_until);
                     $stmt->fetch();
 
-                    if (password_verify($password, $db_password_hash)) {
-                        // Success: Login
-                        session_regenerate_id(true); // Prevent session fixation
-                        $_SESSION['user_id'] = $id;
-                        $_SESSION['username'] = $db_username;
-
-                        // Redirect to dashboard/home
-                        // Redirect to welcome page
-                        header("Location: welcome.php");
-                        exit();
+                    // Check if account is locked
+                    if ($locked_until && new DateTime($locked_until) > new DateTime()) {
+                        $lock_time = new DateTime($locked_until);
+                        $now = new DateTime();
+                        $interval = $now->diff($lock_time);
+                        $minutes = $interval->i + ($interval->h * 60) + 1; // Round up
+                        $errors[] = "Account is locked due to too many failed attempts. Please try again in {$minutes} minutes.";
                     } else {
-                        // Invalid password
-                        $errors[] = "Invalid username or password.";
+                        if (password_verify($password, $db_password_hash)) {
+                            // Success: Login
+
+                            // Reset failed attempts
+                            $reset_stmt = $conn->prepare("UPDATE users SET failed_login_attempts = 0, locked_until = NULL WHERE id = ?");
+                            $reset_stmt->bind_param("i", $id);
+                            $reset_stmt->execute();
+                            $reset_stmt->close();
+
+                            session_regenerate_id(true); // Prevent session fixation
+                            $_SESSION['user_id'] = $id;
+                            $_SESSION['username'] = $db_username;
+
+                            // Redirect to dashboard/home
+                            // Redirect to welcome page
+                            header("Location: welcome.php");
+                            exit();
+                        } else {
+                            // Invalid password
+                            $failed_login_attempts++;
+                            $new_locked_until = null;
+
+                            // Lock out logic (e.g., 5 attempts = 15 minute lock)
+                            if ($failed_login_attempts >= 5) {
+                                $new_locked_until = date('Y-m-d H:i:s', strtotime('+15 minutes'));
+                                $errors[] = "Too many failed attempts. Account locked for 15 minutes.";
+                            } else {
+                                $remaining = 5 - $failed_login_attempts;
+                                $errors[] = "Invalid username or password. {$remaining} attempts remaining.";
+                            }
+
+                            // Update user with new failed attempts count
+                            $update_stmt = $conn->prepare("UPDATE users SET failed_login_attempts = ?, locked_until = ? WHERE id = ?");
+                            $update_stmt->bind_param("isi", $failed_login_attempts, $new_locked_until, $id);
+                            $update_stmt->execute();
+                            $update_stmt->close();
+                        }
                     }
                 } else {
                     // User not found
+                    // To prevent user enumeration, we generally shouldn't distinguish, 
+                    // but for rate limiting valid users, we only track existing accounts here.
+                    // If we wanted to rate limit by IP for non-existent users, that would require a separate table.
                     $errors[] = "Invalid username or password.";
                 }
             } else {

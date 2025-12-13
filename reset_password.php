@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'includes/functions.php';
 // Check if token is present
 $token = $_GET['token'] ?? '';
 if (empty($token) && empty($_POST['token'])) {
@@ -25,7 +26,7 @@ $tokenValue = $_POST['token'] ?? $token;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reset Password - Todo App</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="<?php echo asset_url('style.css'); ?>">
 </head>
 
 <body>

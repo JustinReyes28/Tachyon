@@ -2,6 +2,7 @@
 // notes.php - Display all notes (protected page)
 session_start();
 require_once 'db_connect.php';
+require_once 'includes/functions.php';
 
 // Session protection - redirect if not authenticated
 if (!isset($_SESSION['user_id'])) {
@@ -50,7 +51,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notes - Tachyon</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="<?php echo asset_url('style.css'); ?>">
     <style>
         .notes-grid {
             display: grid;
@@ -142,20 +143,27 @@ try {
             margin-bottom: var(--space-xl);
         }
 
-        .search-input {
+        #search {
             width: 100%;
             padding: var(--space-md);
             font-family: var(--font-sans);
             font-size: 1rem;
-            border: 2px solid var(--color-black);
-            background-color: var(--color-white);
-            color: var(--color-black);
+            border: 2px solid var(--color-white);
+            background-color: var(--color-black) !important;
+            color: var(--color-white) !important;
             outline: none;
             transition: all var(--transition-normal);
         }
 
-        .search-input:focus {
-            background-color: rgba(0, 0, 0, 0.03);
+        #search:focus {
+            background-color: var(--color-black) !important;
+            border-color: var(--color-white) !important;
+            box-shadow: 0 0 0 2px var(--color-dim);
+        }
+
+        #search::placeholder {
+            color: var(--color-white);
+            opacity: 0.5;
         }
 
         .action-row {
@@ -269,9 +277,11 @@ try {
         const csrfToken = "<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>";
 
         // Search functionality
-        document.getElementById('search').addEventListener('input', function (e) {
-            const searchTerm = e.target.value.toLowerCase();
+        const searchInput = document.getElementById('search');
+
+        function filterNotes(searchTerm) {
             const noteCards = document.querySelectorAll('.note-card');
+            searchTerm = searchTerm.toLowerCase();
 
             noteCards.forEach(card => {
                 const title = card.querySelector('.note-title').textContent.toLowerCase();
@@ -283,6 +293,20 @@ try {
                     card.style.display = 'none';
                 }
             });
+        }
+
+        searchInput.addEventListener('input', function (e) {
+            filterNotes(e.target.value);
+        });
+
+        // Check for search query param
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const query = urlParams.get('q');
+            if (query) {
+                searchInput.value = query;
+                filterNotes(query);
+            }
         });
 
         // View note
