@@ -1,8 +1,9 @@
 <?php
-//Latest Change 2
+//Latest Change 3 - Added email verification
 // register_process.php
 session_start();
 require_once 'db_connect.php';
+require_once 'mailer.php';
 
 // Check if data was submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -88,19 +89,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Hash password
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
         $verification_token = bin2hex(random_bytes(32));
-        $is_verified = 0;
+        $email_verified = 0; // Aligns with database_schema.sql column name
 
-        $stmt = $conn->prepare("INSERT INTO users (username, email, password, is_verified, verification_token) VALUES (?, ?, ?, ?, ?)");
+        $password_salt = ''; // PHP's password_hash() handles salting internally
+        $stmt = $conn->prepare("INSERT INTO users (username, email, password_hash, password_salt, email_verified, verification_token) VALUES (?, ?, ?, ?, ?, ?)");
         if ($stmt) {
-            $stmt->bind_param("sssis", $username, $email, $hashed_password, $is_verified, $verification_token);
+            $stmt->bind_param("ssssis", $username, $email, $hashed_password, $password_salt, $email_verified, $verification_token);
 
             if ($stmt->execute()) {
-                // TODO: Send verification email
-                // $verifyLink = "http://yourdomain.com/verify_email.php?token=$verification_token";
-                // mail($email, "Verify your email", "Click here: $verifyLink");
+                // Send verification email
+                $verifyLink = "https://tachyon.rf.gd/verify_email.php?token=$verification_token";
 
-                // Success: Redirect to login page
-                $_SESSION['success_message'] = "Registration successful! Please check your email to verify your account.";
+                try {
+                    if (sendVerificationEmail($email, $verifyLink)) {
+                        $_SESSION['success_message'] = "Registration successful! Please check your email to verify your account.";
+                    } else {
+                        // Email failed but user was created - still allow login but notify
+                        $_SESSION['success_message'] = "Registration successful! There was an issue sending the verification email. Please contact support.";
+                        error_log("Failed to send verification email to: $email");
+                    }
+                } catch (Exception $e) {
+                    // Catch any unexpected errors to prevent 500
+                    $_SESSION['success_message'] = "Registration successful! There was an issue sending the verification email. Please contact support.";
+                    error_log("Exception sending verification email: " . $e->getMessage());
+                }
+
                 header("Location: login.php");
                 exit();
             } else {

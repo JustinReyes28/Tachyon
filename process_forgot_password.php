@@ -30,17 +30,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->fetch();
             $stmt->close();
 
-            // Generate token and expiration (1 hour from now)
+            // Generate token (expiration will be set in SQL using MySQL's NOW())
             $token = bin2hex(random_bytes(32));
-            $expires_at = date('Y-m-d H:i:s', time() + 3600);
 
-            $updateStmt = $conn->prepare("UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?");
+            // Use MySQL's NOW() + INTERVAL to ensure consistent timezone
+            $updateStmt = $conn->prepare("UPDATE users SET reset_token = ?, reset_token_expires = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE id = ?");
             if ($updateStmt) {
-                $updateStmt->bind_param("ssi", $token, $expires_at, $userId);
+                $updateStmt->bind_param("si", $token, $userId);
                 if ($updateStmt->execute()) {
                     // Send email using PHPMailer
                     require_once 'mailer.php';
-                    $resetLink = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/reset_password.php?token=$token";
+                    // Detect scheme
+                    $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
+                    $resetLink = $scheme . "://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/reset_password.php?token=" . urlencode($token);
 
                     if (sendResetEmail($email, $resetLink)) {
                         $_SESSION['success_message'] = "If an account exists with that email, a password reset link has been sent.";
@@ -49,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $log_dir = __DIR__ . '/private_logs';
                         if (!is_dir($log_dir))
                             mkdir($log_dir, 0750, true);
-                        file_put_contents($log_dir . '/email_errors.log', "[" . date('Y-m-d H:i:s') . "] Failed to send to $email" . PHP_EOL, FILE_APPEND);
+                        file_put_contents($log_dir . '/email_errors.log', "[" . date('Y-m-d H:i:s') . "] Failed to send password reset email (target redacted)" . PHP_EOL, FILE_APPEND);
                         $_SESSION['success_message'] = "If an account exists with that email, a password reset link has been sent.";
                     }
                 } else {
