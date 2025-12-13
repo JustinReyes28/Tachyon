@@ -57,5 +57,5 @@ inspect_todos.php
 # PhpMailer directory
 phpmailer/
 mailer.php
-*.example
+phpmailer/*.example
 
