@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
 
 // Only accept POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header("Location: dashboard.php");
+    header("Location: todos.php");
     exit();
 }
 

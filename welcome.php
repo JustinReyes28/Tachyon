@@ -32,8 +32,8 @@ $username = $_SESSION['username'] ?? 'User';
                 Hello <strong><?php echo htmlspecialchars($username); ?></strong>, you have successfully logged in.
             </p>
             <div style="display: flex; gap: 1rem; justify-content: center;">
-                <a href="dashboard.php" class="btn btn-primary">DASHBOARD</a>
-                <a href="logout.php" class="btn btn-primary">LOGOUT</a>
+                <a href="dashboard.php">DASHBOARD</a>
+                <a href="logout.php">LOGOUT</a>
             </div>
         </div>
     </div>

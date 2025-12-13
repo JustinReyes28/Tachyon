@@ -1,5 +1,5 @@
 <?php
-// dashboard.php - Main dashboard (protected page)
+// notes.php - Display all notes (protected page)
 session_start();
 require_once 'db_connect.php';
 
@@ -22,33 +22,24 @@ $success_message = $_SESSION['success_message'] ?? '';
 $error_message = $_SESSION['error_message'] ?? '';
 unset($_SESSION['success_message'], $_SESSION['error_message']);
 
-// Fetch active notes count
-$total_notes = 0;
+// Fetch all notes for the current user
+$notes = [];
 try {
-    $stmt = $conn->prepare("SELECT COUNT(*) FROM notes WHERE user_id = ? AND is_archived = 0");
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    $stmt->bind_result($total_notes);
-    $stmt->fetch();
-    $stmt->close();
-} catch (Exception $e) {
-    // Keep 0 if error
-    error_log("Error counting notes: " . $e->getMessage());
-}
-
-// Fetch recent notes
-$recent_notes = [];
-try {
-    $stmt = $conn->prepare("SELECT id, title, content, created_at, is_pinned FROM notes WHERE user_id = ? AND is_archived = 0 ORDER BY is_pinned DESC, updated_at DESC LIMIT 3");
+    $stmt = $conn->prepare("SELECT id, title, content, color, is_pinned, is_archived, created_at, updated_at 
+                            FROM notes 
+                            WHERE user_id = ? AND is_archived = 0 
+                            ORDER BY is_pinned DESC, updated_at DESC");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
+
     while ($row = $result->fetch_assoc()) {
-        $recent_notes[] = $row;
+        $notes[] = $row;
     }
     $stmt->close();
 } catch (Exception $e) {
-    error_log("Error fetching recent notes: " . $e->getMessage());
+    error_log("Error fetching notes: " . $e->getMessage());
+    $error_message = "Failed to load notes. Please try again.";
 }
 ?>
 <!DOCTYPE html>
@@ -57,10 +48,17 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Tachyon</title>
+    <title>Notes - Tachyon</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--space-lg);
+            margin-top: var(--space-xl);
+        }
+
         .note-card {
             background-color: var(--color-white);
             color: var(--color-black);
@@ -123,6 +121,51 @@ try {
             opacity: 1;
         }
 
+        .empty-state {
+            text-align: center;
+            padding: var(--space-2xl);
+            color: var(--color-dim);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: var(--space-lg);
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 1.125rem;
+            margin-bottom: var(--space-md);
+        }
+
+        .search-bar {
+            margin-bottom: var(--space-xl);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: var(--space-md);
+            font-family: var(--font-sans);
+            font-size: 1rem;
+            border: 2px solid var(--color-black);
+            background-color: var(--color-white);
+            color: var(--color-black);
+            outline: none;
+            transition: all var(--transition-normal);
+        }
+
+        .search-input:focus {
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+
+        .action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+            gap: var(--space-md);
+        }
+
         .note-actions {
             display: flex;
             gap: var(--space-sm);
@@ -155,19 +198,10 @@ try {
             <h1 class="app-title">TACHYON</h1>
             <div class="user-nav">
                 <span class="user-welcome"><?php echo htmlspecialchars($username); ?></span>
+                <a href="dashboard.php" class="btn btn-sm">Dashboard</a>
                 <a href="logout.php" class="btn btn-sm">Logout</a>
             </div>
         </header>
-
-        <!-- Dashboard Navigation -->
-        <section class="dashboard-nav-section">
-            <h2 class="section-title">Dashboard Navigation</h2>
-            <div class="nav-buttons">
-                <a href="todos.php" class="nav-btn">[ToDos]</a>
-                <a href="create_note.php" class="nav-btn">[Notes]</a>
-                <a href="profile.php" class="nav-btn">[Profile]</a>
-            </div>
-        </section>
 
         <!-- Messages -->
         <?php if ($success_message): ?>
@@ -178,49 +212,32 @@ try {
             <div class="alert alert-error"><?php echo htmlspecialchars($error_message); ?></div>
         <?php endif; ?>
 
-        <!-- Stats & Actions Grid -->
-        <div class="stats-grid">
-            <!-- Total Notes Card -->
-            <div class="stat-card">
-                <div class="stat-value"><?php echo $total_notes; ?></div>
-                <div class="stat-label">Total Notes</div>
-            </div>
-
-            <!-- New Note Card -->
-            <a href="create_note.php" class="stat-card" style="text-decoration: none;">
-                <div class="stat-value">+</div>
-                <div class="stat-label">New Note</div>
-            </a>
-
-            <!-- View All Notes Card -->
-            <a href="notes.php" class="stat-card" style="text-decoration: none;">
-                <div class="stat-value">ALL</div>
-                <div class="stat-label">View Notes</div>
-            </a>
-        </div>
-
-        <!-- Search Section -->
-        <div class="search-section" style="margin-bottom: var(--space-xl);">
-            <div class="search-field">
-                <input type="text" id="search" name="search" placeholder="[Search...]" class="search-input">
+        <!-- Action Row -->
+        <div class="action-row">
+            <a href="create_note.php" class="btn btn-action-primary">[+ NEW NOTE]</a>
+            <div class="search-bar" style="flex: 1; max-width: 400px;">
+                <input type="text" id="search" placeholder="[Search notes...]" class="search-input">
             </div>
         </div>
 
         <!-- Notes Grid -->
         <section class="notes-section">
-            <div class="notes-grid">
-                <?php if (empty($recent_notes)): ?>
-                    <div class="note-card"
-                        style="text-align: center; justify-content: center; align-items: center; display: flex; color: var(--color-dim);">
-                        <p class="note-preview">No notes found. Create one!</p>
-                    </div>
-                <?php else: ?>
-                    <?php foreach ($recent_notes as $note): ?>
+            <?php if (empty($notes)): ?>
+                <div class="empty-state">
+                    <div class="empty-state-icon">📝</div>
+                    <div class="empty-state-text">No notes yet</div>
+                    <p>Create your first note to get started!</p>
+                    <a href="create_note.php" class="btn btn-ghost" style="margin-top: var(--space-lg);">Create Note</a>
+                </div>
+            <?php else: ?>
+                <div class="notes-grid" id="notes-grid">
+                    <?php foreach ($notes as $note): ?>
                         <div class="note-card <?php echo $note['is_pinned'] ? 'pinned' : ''; ?>"
                             data-note-id="<?php echo $note['id']; ?>">
                             <h3 class="note-title"><?php echo htmlspecialchars($note['title']); ?></h3>
                             <div class="note-preview">
                                 <?php
+                                // Strip HTML tags and get plain text preview
                                 $plainText = strip_tags($note['content']);
                                 $preview = mb_strlen($plainText) > 200 ? mb_substr($plainText, 0, 200) . '...' : $plainText;
                                 echo htmlspecialchars($preview);
@@ -229,7 +246,7 @@ try {
                             <div class="note-meta">
                                 <span class="note-date">
                                     <?php
-                                    $date = new DateTime($note['created_at']); // Using created_at for dashboard as it's "Recent Notes" but logic could swap to updated_at if preferred
+                                    $date = new DateTime($note['updated_at']);
                                     echo $date->format('M j, Y g:i A');
                                     ?>
                                 </span>
@@ -241,22 +258,44 @@ try {
                             </div>
                         </div>
                     <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
+                </div>
+            <?php endif; ?>
         </section>
     </div>
-    <script src="script.js"></script>
+
+    </div>
+
     <script>
         const csrfToken = "<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>";
 
+        // Search functionality
+        document.getElementById('search').addEventListener('input', function (e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const noteCards = document.querySelectorAll('.note-card');
+
+            noteCards.forEach(card => {
+                const title = card.querySelector('.note-title').textContent.toLowerCase();
+                const preview = card.querySelector('.note-preview').textContent.toLowerCase();
+
+                if (title.includes(searchTerm) || preview.includes(searchTerm)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // View note
         function viewNote(noteId) {
             window.location.href = `view_note.php?id=${noteId}`;
         }
 
+        // Edit note
         function editNote(noteId) {
             window.location.href = `edit_note.php?id=${noteId}`;
         }
 
+        // Delete note
         function deleteNote(noteId) {
             if (confirm('Are you sure you want to delete this note?')) {
                 const form = document.createElement('form');
@@ -280,8 +319,10 @@ try {
             }
         }
 
+        // Click on card to view
         document.querySelectorAll('.note-card').forEach(card => {
             card.addEventListener('click', function (e) {
+                // Only trigger if clicking on the card itself, not the action buttons
                 if (!e.target.classList.contains('note-action-btn')) {
                     const noteId = this.dataset.noteId;
                     viewNote(noteId);

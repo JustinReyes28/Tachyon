@@ -33,7 +33,7 @@ try {
     // Only accept POST requests
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         debug_log("Not POST request");
-        header("Location: dashboard.php");
+        header("Location: todos.php");
         exit();
     }
 

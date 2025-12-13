@@ -50,7 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_SESSION['username'] = $db_username;
 
                         // Redirect to dashboard/home
-                        header("Location: dashboard.php");
+                        // Redirect to welcome page
+                        header("Location: welcome.php");
                         exit();
                     } else {
                         // Invalid password
