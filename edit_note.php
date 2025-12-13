@@ -13,7 +13,7 @@ $user_id = $_SESSION['user_id'];
 $username = $_SESSION['username'] ?? 'User';
 
 // Content Security Policy
-header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.quilljs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.quilljs.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:;");
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:;");
 
 // CSRF token generation
 if (!isset($_SESSION['csrf_token'])) {
@@ -35,6 +35,14 @@ try {
     $stmt = $conn->prepare("SELECT id, title, content, color, is_pinned, is_archived 
                             FROM notes 
                             WHERE id = ? AND user_id = ?");
+
+    if ($stmt === false) {
+        error_log("Error preparing statement (edit_note.php): " . $conn->error);
+        $_SESSION['error_message'] = "Failed to load note due to a database error.";
+        header("Location: notes.php");
+        exit();
+    }
+
     $stmt->bind_param("ii", $note_id, $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -69,7 +77,8 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <!-- Quill Editor CSS -->
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet"
+        integrity="sha384-ecIckRi4QlKYya/FQUbBUjS4qp65jF/J87Guw5uzTbO1C1Jfa/6kYmd6dXUF6D7i" crossorigin="anonymous">
     <style>
         /* Quill Editor Customization for Nothing OS Theme */
         .note-editor-container {
@@ -260,7 +269,9 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
     </div>
 
     <!-- Quill Editor JS -->
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"
+        integrity="sha384-utBUCeG4SYaCm4m7GQZYr8Hy8Fpy3V4KGjBZaf4WTKOcwhCYpt/0PfeEe3HNlwx8"
+        crossorigin="anonymous"></script>
     <script>
         // Initialize Quill editor
         var quill = new Quill('#editor-container', {
@@ -282,7 +293,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
         });
 
         // Load existing content
-        var existingContent = <?php echo json_encode($note['content']); ?>;
+        var existingContent = <?php echo json_encode($note['content'], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
         quill.root.innerHTML = existingContent;
 
         // Update character count

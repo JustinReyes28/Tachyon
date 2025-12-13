@@ -19,6 +19,7 @@ if (!file_exists($envFile)) {
     define('SMTP_FROM_EMAIL', 'noreply@example.com');
     define('SMTP_FROM_NAME', 'Tachyon');
     define('SMTP_ENCRYPTION', 'tls');
+    define('APP_URL', 'https://tachyon.rf.gd');
 } else {
     $env = parse_ini_file($envFile);
 
@@ -31,6 +32,7 @@ if (!file_exists($envFile)) {
         define('SMTP_FROM_EMAIL', 'noreply@example.com');
         define('SMTP_FROM_NAME', 'Tachyon');
         define('SMTP_ENCRYPTION', 'tls');
+        define('APP_URL', 'https://tachyon.rf.gd');
     } else {
         // SMTP Configuration - load from .env or use defaults
         define('SMTP_HOST', $env['SMTP_HOST'] ?? '');
@@ -40,11 +42,11 @@ if (!file_exists($envFile)) {
         define('SMTP_FROM_EMAIL', $env['SMTP_FROM_EMAIL'] ?? 'noreply@tachyon.rf.gd');
         define('SMTP_FROM_NAME', $env['SMTP_FROM_NAME'] ?? 'Tachyon Task Manager');
         define('SMTP_ENCRYPTION', $env['SMTP_ENCRYPTION'] ?? 'tls');
+        define('APP_URL', $env['APP_URL'] ?? 'https://tachyon.rf.gd');
     }
 }
 
-// Application URL for email links
-define('APP_URL', 'https://tachyon.rf.gd');
+// Application URL for email links (Defined above)
 
 // Email reminder settings
 define('REMINDER_DAYS_BEFORE', 1); // Send reminder 1 day before due date
