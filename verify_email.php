@@ -18,7 +18,7 @@ if (isset($_GET['token'])) {
             $stmt->close();
 
             // Update user to verified and clear/consume the token
-            $updateStmt = $conn->prepare("UPDATE users SET is_verified = 1, verification_token = NULL WHERE id = ?");
+            $updateStmt = $conn->prepare("UPDATE users SET email_verified = 1, verification_token = NULL WHERE id = ?");
             if ($updateStmt) {
                 $updateStmt->bind_param("i", $userId);
                 if ($updateStmt->execute()) {

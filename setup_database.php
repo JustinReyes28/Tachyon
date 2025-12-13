@@ -50,13 +50,23 @@ $conn->select_db(DB_NAME);
 $sql_users = "CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    is_verified TINYINT(1) DEFAULT 0,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    password_salt VARCHAR(32) NOT NULL,
+    password_changed_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
+    last_password_reset DATETIME(6) NULL,
+    failed_login_attempts INT DEFAULT 0,
+    locked_until DATETIME(6) NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    email_verified BOOLEAN DEFAULT FALSE,
     verification_token VARCHAR(255) NULL,
     reset_token VARCHAR(255) NULL,
-    reset_token_expires_at DATETIME NULL
+    reset_token_expires DATETIME(6) NULL,
+    two_factor_secret VARCHAR(255) NULL,
+    two_factor_enabled BOOLEAN DEFAULT FALSE,
+    created_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    last_login DATETIME(6) NULL
 )";
 
 // SQL to create todos table
@@ -79,10 +89,10 @@ if ($conn->query($sql_users) === TRUE) {
 
     // Migration: Check if new columns exist, if not, add them
     $columns_to_check = [
-        'is_verified' => "TINYINT(1) DEFAULT 0",
+        'email_verified' => "BOOLEAN DEFAULT FALSE",
         'verification_token' => "VARCHAR(255) NULL",
         'reset_token' => "VARCHAR(255) NULL",
-        'reset_token_expires_at' => "DATETIME NULL"
+        'reset_token_expires' => "DATETIME(6) NULL"
     ];
 
     foreach ($columns_to_check as $col => $def) {

@@ -158,3 +158,17 @@ CREATE TABLE activity_log (
     INDEX idx_action (action),
     INDEX idx_ip_address (ip_address)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `email_notifications` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `todo_id` int NOT NULL,
+  `notification_type` varchar(50) DEFAULT 'due_date_reminder',
+  `sent_at` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
+  `email_status` enum('sent','failed','pending') DEFAULT 'pending',
+  `error_message` text,
+  PRIMARY KEY (`id`),
+  KEY `idx_user_todo` (`user_id`, `todo_id`, `sent_at`),
+  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`todo_id`) REFERENCES `todos` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

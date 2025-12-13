@@ -1,122 +1,162 @@
 <?php
 // add_todo.php - Process adding a new todo
-session_start();
-require_once 'db_connect.php';
+// Wrapped in try-catch for debugging 500 error
 
-// Session protection
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+error_reporting(E_ALL);
+
+$debug_log_file = __DIR__ . '/debug_add_todo.log';
+
+function debug_log($message)
+{
+    global $debug_log_file;
+    file_put_contents($debug_log_file, "[" . date('Y-m-d H:i:s') . "] " . $message . PHP_EOL, FILE_APPEND);
 }
 
-// Only accept POST requests
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header("Location: dashboard.php");
-    exit();
-}
+try {
+    debug_log("Script started");
 
-$errors = [];
-$requestId = session_id() ?: bin2hex(random_bytes(16));
+    session_start();
+    debug_log("Session started");
 
-// CSRF token validation
-if (!isset($_POST['csrf_token']) || !isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-    $_SESSION['error_message'] = 'Invalid request. Please try again.';
-    error_log("CSRF token validation failed (add_todo) [Request ID: $requestId]");
-    header('Location: dashboard.php');
-    exit();
-}
+    require_once 'db_connect.php';
+    debug_log("db_connect included");
 
-// Rotate CSRF token after successful validation
-$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-
-$user_id = $_SESSION['user_id'];
-
-// Get and validate inputs
-// Get and validate inputs
-$title = trim($_POST['title'] ?? '');
-$priority = $_POST['priority'] ?? 'medium';
-$due_date = $_POST['due_date'] ?? null;
-
-// Validate title
-if (empty($title)) {
-    $_SESSION['error_message'] = 'Title is required.';
-    header('Location: dashboard.php');
-    exit();
-}
-
-// Validate title length (match VARCHAR(255))
-if (strlen($title) > 255) {
-    $_SESSION['error_message'] = 'Title is too long. Maximum 255 characters.';
-    header('Location: dashboard.php');
-    exit();
-}
-
-// Validate priority
-$allowed_priorities = ['low', 'medium', 'high'];
-if (!in_array($priority, $allowed_priorities)) {
-    $priority = 'medium';
-}
-
-// Validate and sanitize due_date
-$final_due_date = null;
-if (!empty($due_date)) {
-    $date_obj = DateTime::createFromFormat('Y-m-d', $due_date);
-    if ($date_obj && $date_obj->format('Y-m-d') === $due_date) {
-        $final_due_date = $due_date;
+    // Session protection
+    if (!isset($_SESSION['user_id'])) {
+        debug_log("User not logged in, redirecting");
+        header("Location: login.php");
+        exit();
     }
-}
 
-// Insert todo into database
-if ($final_due_date !== null) {
-    $sql = "INSERT INTO todos (user_id, title, description, status, priority, due_date) VALUES (?, ?, ?, 'pending', ?, ?)";
-} else {
-    $sql = "INSERT INTO todos (user_id, title, description, status, priority, due_date) VALUES (?, ?, ?, 'pending', ?, NULL)";
-}
+    // Only accept POST requests
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        debug_log("Not POST request");
+        header("Location: dashboard.php");
+        exit();
+    }
 
-$stmt = $conn->prepare($sql);
+    $errors = [];
+    $requestId = session_id() ?: bin2hex(random_bytes(16));
 
-if ($stmt) {
-    // Setting description as empty since it's not in the form
-    $description = '';
+    // CSRF token validation
+    if (!isset($_POST['csrf_token']) || !isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        $_SESSION['error_message'] = 'Invalid request. Please try again.';
+        debug_log("CSRF validation failed");
+        error_log("CSRF token validation failed (add_todo) [Request ID: $requestId]");
+        header('Location: dashboard.php');
+        exit();
+    }
 
+    // Rotate CSRF token after successful validation
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
+    $user_id = $_SESSION['user_id'];
+
+    // Get and validate inputs
+    $task = trim($_POST['task'] ?? '');
+    $priority = $_POST['priority'] ?? 'medium';
+    $due_date = $_POST['due_date'] ?? null;
+
+    debug_log("Inputs received - Task: " . substr($task, 0, 20) . "...");
+
+    // Validate task
+    if (empty($task)) {
+        $_SESSION['error_message'] = 'Task is required.';
+        header('Location: dashboard.php');
+        exit();
+    }
+
+    // Validate task length
+    if (strlen($task) > 1000) {
+        $_SESSION['error_message'] = 'Task is too long. Maximum 1000 characters.';
+        header('Location: dashboard.php');
+        exit();
+    }
+
+    // Validate priority
+    $allowed_priorities = ['low', 'medium', 'high'];
+    if (!in_array($priority, $allowed_priorities)) {
+        $priority = 'medium';
+    }
+
+    // Validate and sanitize due_date
+    $final_due_date = null;
+    if (!empty($due_date)) {
+        $date_obj = DateTime::createFromFormat('Y-m-d', $due_date);
+        if ($date_obj && $date_obj->format('Y-m-d') === $due_date) {
+            $final_due_date = $due_date;
+        }
+    }
+
+    // Insert todo into database
     if ($final_due_date !== null) {
-        $stmt->bind_param("issss", $user_id, $title, $description, $priority, $final_due_date);
+        $sql = "INSERT INTO todos (user_id, task, description, status, priority, due_date, created_by) VALUES (?, ?, ?, 'pending', ?, ?, ?)";
     } else {
-        $stmt->bind_param("isss", $user_id, $title, $description, $priority);
+        $sql = "INSERT INTO todos (user_id, task, description, status, priority, due_date, created_by) VALUES (?, ?, ?, 'pending', ?, NULL, ?)";
     }
 
-    if ($stmt->execute()) {
-        $_SESSION['success_message'] = 'Task added successfully!';
+    debug_log("Preparing statement");
+    $stmt = $conn->prepare($sql);
+
+    if ($stmt) {
+        // Setting description as empty since it's not in the form
+        $description = '';
+
+        debug_log("Binding parameters");
+        if ($final_due_date !== null) {
+            $stmt->bind_param("issssi", $user_id, $task, $description, $priority, $final_due_date, $user_id);
+        } else {
+            $stmt->bind_param("isssi", $user_id, $task, $description, $priority, $user_id);
+        }
+
+        debug_log("Executing statement");
+        if ($stmt->execute()) {
+            $_SESSION['success_message'] = 'Task added successfully!';
+            debug_log("Execute successful");
+        } else {
+            // Log error securely
+            debug_log("Execute failed: " . $stmt->error);
+
+            $log_dir = __DIR__ . '/private_logs';
+            $log_file = $log_dir . '/db_errors.log';
+            if (!is_dir($log_dir)) {
+                mkdir($log_dir, 0750, true);
+            }
+
+            $log_message = "[" . date('Y-m-d H:i:s') . "] Request ID: $requestId | Add Todo Insert Error" . PHP_EOL;
+            file_put_contents($log_file, $log_message, FILE_APPEND);
+            error_log("Database error (add_todo insert) [$requestId]: " . $stmt->error);
+
+            $_SESSION['error_message'] = 'Failed to add task. Please try again.';
+        }
+        $stmt->close();
     } else {
-        // Log error securely
+        // Log prepare error
+        debug_log("Prepare failed: " . $conn->error);
+
         $log_dir = __DIR__ . '/private_logs';
         $log_file = $log_dir . '/db_errors.log';
         if (!is_dir($log_dir)) {
             mkdir($log_dir, 0750, true);
         }
 
-        $log_message = "[" . date('Y-m-d H:i:s') . "] Request ID: $requestId | Add Todo Insert Error" . PHP_EOL;
+        $log_message = "[" . date('Y-m-d H:i:s') . "] Request ID: $requestId | Add Todo Prepare Error" . PHP_EOL;
         file_put_contents($log_file, $log_message, FILE_APPEND);
-        error_log("Database error (add_todo insert) [$requestId]: " . $stmt->error);
+        error_log("Database error (add_todo prepare) [$requestId]: " . $conn->error);
 
-        $_SESSION['error_message'] = 'Failed to add task. Please try again.';
-    }
-    $stmt->close();
-} else {
-    // Log prepare error
-    $log_dir = __DIR__ . '/private_logs';
-    $log_file = $log_dir . '/db_errors.log';
-    if (!is_dir($log_dir)) {
-        mkdir($log_dir, 0750, true);
+        $_SESSION['error_message'] = 'An internal error occurred. Please try again.';
     }
 
-    $log_message = "[" . date('Y-m-d H:i:s') . "] Request ID: $requestId | Add Todo Prepare Error" . PHP_EOL;
-    file_put_contents($log_file, $log_message, FILE_APPEND);
-    error_log("Database error (add_todo prepare) [$requestId]: " . $conn->error);
+    header('Location: dashboard.php');
+    exit();
 
-    $_SESSION['error_message'] = 'An internal error occurred. Please try again.';
+} catch (Throwable $e) {
+    debug_log("FATAL EXCEPTION: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine());
+
+    // Attempt to show standard error page if possible, or just exit
+    http_response_code(500);
+    echo "An error occurred. Check debug_add_todo.log for details.";
 }
-
-header('Location: dashboard.php');
-exit();
 ?>
