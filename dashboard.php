@@ -22,25 +22,18 @@ $success_message = $_SESSION['success_message'] ?? '';
 $error_message = $_SESSION['error_message'] ?? '';
 unset($_SESSION['success_message'], $_SESSION['error_message']);
 
-// Fetch user's todos
-$todos = [];
-$stmt = $conn->prepare("SELECT id, task, description, status, priority, due_date, created_at FROM todos WHERE user_id = ? ORDER BY
-    CASE priority
-        WHEN 'high' THEN 1
-        WHEN 'medium' THEN 2
-        WHEN 'low' THEN 3
-    END,
-    created_at DESC");
-
-if ($stmt) {
+// Fetch active notes count
+$total_notes = 0;
+try {
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM notes WHERE user_id = ? AND is_archived = 0");
     $stmt->bind_param("i", $user_id);
-    if ($stmt->execute()) {
-        $result = $stmt->get_result();
-        while ($row = $result->fetch_assoc()) {
-            $todos[] = $row;
-        }
-    }
+    $stmt->execute();
+    $stmt->bind_result($total_notes);
+    $stmt->fetch();
     $stmt->close();
+} catch (Exception $e) {
+    // Keep 0 if error
+    error_log("Error counting notes: " . $e->getMessage());
 }
 ?>
 <!DOCTYPE html>
@@ -49,7 +42,7 @@ if ($stmt) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Todo App</title>
+    <title>Dashboard - Tachyon</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -68,6 +61,16 @@ if ($stmt) {
             </div>
         </header>
 
+        <!-- Dashboard Navigation -->
+        <section class="dashboard-nav-section">
+            <h2 class="section-title">Dashboard Navigation</h2>
+            <div class="nav-buttons">
+                <a href="todos.php" class="nav-btn">[ToDos]</a>
+                <a href="create_note.php" class="nav-btn">[Notes]</a>
+                <a href="profile.php" class="nav-btn">[Profile]</a>
+            </div>
+        </section>
+
         <!-- Messages -->
         <?php if ($success_message): ?>
             <div class="alert alert-success"><?php echo htmlspecialchars($success_message); ?></div>
@@ -77,103 +80,60 @@ if ($stmt) {
             <div class="alert alert-error"><?php echo htmlspecialchars($error_message); ?></div>
         <?php endif; ?>
 
-        <!-- Stats -->
-        <?php
-        $total = count($todos);
-        $completed = count(array_filter($todos, fn($t) => $t['status'] === 'completed'));
-        $pending = $total - $completed;
-        ?>
+        <!-- Stats & Actions Grid -->
         <div class="stats-grid">
+            <!-- Total Notes Card -->
             <div class="stat-card">
-                <div class="stat-value"><?php echo $total; ?></div>
-                <div class="stat-label">Total Tasks</div>
+                <div class="stat-value"><?php echo $total_notes; ?></div>
+                <div class="stat-label">Total Notes</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value"><?php echo $pending; ?></div>
-                <div class="stat-label">Pending</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value"><?php echo $completed; ?></div>
-                <div class="stat-label">Completed</div>
+
+            <!-- New Note Card -->
+            <a href="create_note.php" class="stat-card" style="text-decoration: none;">
+                <div class="stat-value">+</div>
+                <div class="stat-label">New Note</div>
+            </a>
+
+            <!-- View All Notes Card -->
+            <a href="notes.php" class="stat-card" style="text-decoration: none;">
+                <div class="stat-value">ALL</div>
+                <div class="stat-label">View Notes</div>
+            </a>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section" style="margin-bottom: var(--space-xl);">
+            <div class="search-field">
+                <input type="text" id="search" name="search" placeholder="[Search...]" class="search-input">
             </div>
         </div>
 
-        <!-- Add Todo Form -->
-        <div class="add-task-card">
-            <h2>+ NEW TASK</h2>
-            <form action="add_todo.php" method="POST" class="mt-4">
-                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-                <div class="task-form-row">
-                    <div class="form-group">
-                        <label for="task">Task</label>
-                        <input type="text" id="task" name="task" placeholder="What needs to be done?" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="priority">Priority</label>
-                        <select id="priority" name="priority">
-                            <option value="medium">Medium</option>
-                            <option value="high">High</option>
-                            <option value="low">Low</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="due_date">Due Date</label>
-                        <input type="date" id="due_date" name="due_date">
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <button type="submit" class="btn btn-primary">Add Task</button>
+        <!-- Notes Grid -->
+        <section class="notes-section">
+            <div class="notes-grid">
+                <div class="note-card">
+                    <h3 class="note-title">Sample Note 1</h3>
+                    <p class="note-preview">This is a preview of your first note content...</p>
+                    <div class="note-meta">
+                        <span class="note-date">Dec 13, 2024</span>
                     </div>
                 </div>
-            </form>
-        </div>
-
-        <!-- Todo List -->
-        <div class="todo-list">
-            <?php if (empty($todos)): ?>
-                <div class="empty-state">
-                    <h3>No tasks yet!</h3>
-                    <p>Add your first task above to get started.</p>
-                </div>
-            <?php else: ?>
-                <?php foreach ($todos as $todo): ?>
-                    <div
-                        class="todo-item priority-<?php echo htmlspecialchars($todo['priority']); ?> <?php echo $todo['status'] === 'completed' ? 'completed' : ''; ?>">
-                        <div class="todo-content">
-                            <div class="todo-title"><?php echo htmlspecialchars($todo['task']); ?></div>
-                            <div class="todo-meta">
-                                <span class="badge badge-status <?php echo htmlspecialchars($todo['status']); ?>">
-                                    <?php echo ucfirst(str_replace('_', ' ', htmlspecialchars($todo['status']))); ?>
-                                </span>
-                                <span class="badge badge-priority <?php echo htmlspecialchars($todo['priority']); ?>">
-                                    <?php echo ucfirst(htmlspecialchars($todo['priority'])); ?> Priority
-                                </span>
-                                <?php if ($todo['due_date']): ?>
-                                    <span class="badge" style="background: #f1f5f9; color: #64748b;">
-                                        Due: <?php echo date('M j, Y', strtotime($todo['due_date'])); ?>
-                                    </span>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                        <div class="todo-actions">
-                            <?php if ($todo['status'] !== 'completed'): ?>
-                                <form action="complete_todo.php" method="POST" style="display:inline;">
-                                    <input type="hidden" name="csrf_token"
-                                        value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-                                    <input type="hidden" name="todo_id" value="<?php echo (int) $todo['id']; ?>">
-                                    <button type="submit" class="btn btn-success btn-sm">Complete</button>
-                                </form>
-                            <?php endif; ?>
-                            <form action="delete_todo.php" method="POST" style="display:inline;">
-                                <input type="hidden" name="csrf_token"
-                                    value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-                                <input type="hidden" name="todo_id" value="<?php echo (int) $todo['id']; ?>">
-                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                            </form>
-                        </div>
+                <div class="note-card">
+                    <h3 class="note-title">Sample Note 2</h3>
+                    <p class="note-preview">This is a preview of your second note content...</p>
+                    <div class="note-meta">
+                        <span class="note-date">Dec 12, 2024</span>
                     </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
+                </div>
+                <div class="note-card">
+                    <h3 class="note-title">Sample Note 3</h3>
+                    <p class="note-preview">This is a preview of your third note content...</p>
+                    <div class="note-meta">
+                        <span class="note-date">Dec 11, 2024</span>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
     <script src="script.js"></script>
 </body>
