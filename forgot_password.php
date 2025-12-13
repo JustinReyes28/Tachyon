@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'includes/functions.php';
 // Database connection not required for form render; moved to process_forgot_password.php
 // Generate CSRF token
 if (empty($_SESSION['csrf_token'])) {
@@ -17,7 +18,7 @@ unset($_SESSION['errors'], $_SESSION['success_message']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forgot Password - Todo App</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="<?php echo asset_url('style.css'); ?>">
 </head>
 
 <body>

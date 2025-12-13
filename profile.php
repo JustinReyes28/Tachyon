@@ -2,6 +2,7 @@
 // profile.php - User Profile Page (protected page)
 session_start();
 require_once 'db_connect.php';
+require_once 'includes/functions.php';
 
 // Session protection - redirect if not authenticated
 if (!isset($_SESSION['user_id'])) {
@@ -45,7 +46,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - Tachyon</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="<?php echo asset_url('style.css'); ?>">
 </head>
 
 <body>
@@ -87,15 +88,18 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                 <h3>User Information</h3>
 
                 <div class="profile-info" style="margin-bottom: 1.5rem;">
-                    <div class="info-item" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding: 0.5rem 0;">
+                    <div class="info-item"
+                        style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding: 0.5rem 0;">
                         <label style="color: #6c757d; font-weight: 500;">Username:</label>
                         <span><?php echo htmlspecialchars($username); ?></span>
                     </div>
-                    <div class="info-item" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding: 0.5rem 0;">
+                    <div class="info-item"
+                        style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding: 0.5rem 0;">
                         <label style="color: #6c757d; font-weight: 500;">User ID:</label>
                         <span><?php echo htmlspecialchars($user_id); ?></span>
                     </div>
-                    <div class="info-item" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding: 0.5rem 0;">
+                    <div class="info-item"
+                        style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding: 0.5rem 0;">
                         <label style="color: #6c757d; font-weight: 500;">Email Address:</label>
                         <span><?php echo htmlspecialchars($email); ?></span>
                     </div>
@@ -109,7 +113,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             </div>
         </section>
     </div>
-    <script src="script.js"></script>
+    <script src="<?php echo asset_url('script.js'); ?>"></script>
 </body>
 
 </html>

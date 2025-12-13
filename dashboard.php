@@ -2,6 +2,7 @@
 // dashboard.php - Main dashboard (protected page)
 session_start();
 require_once 'db_connect.php';
+require_once 'includes/functions.php';
 
 // Session protection - redirect if not authenticated
 if (!isset($_SESSION['user_id'])) {
@@ -59,7 +60,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Tachyon</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="<?php echo asset_url('style.css'); ?>">
     <style>
         .note-card {
             background-color: var(--color-white);
@@ -245,7 +246,7 @@ try {
             </div>
         </section>
     </div>
-    <script src="script.js"></script>
+    <script src="<?php echo asset_url('script.js'); ?>"></script>
     <script>
         const csrfToken = "<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>";
 

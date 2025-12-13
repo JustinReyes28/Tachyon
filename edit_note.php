@@ -2,6 +2,7 @@
 // edit_note.php - Edit an existing note (protected page)
 session_start();
 require_once 'db_connect.php';
+require_once 'includes/functions.php';
 
 // Session protection - redirect if not authenticated
 if (!isset($_SESSION['user_id'])) {
@@ -75,7 +76,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Note - Tachyon</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="<?php echo asset_url('style.css'); ?>">
     <!-- Quill Editor CSS -->
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet"
         integrity="sha384-ecIckRi4QlKYya/FQUbBUjS4qp65jF/J87Guw5uzTbO1C1Jfa/6kYmd6dXUF6D7i" crossorigin="anonymous">
