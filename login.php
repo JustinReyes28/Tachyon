@@ -1,6 +1,7 @@
 <?php
 // login.php
 session_start();
+require_once 'includes/functions.php';
 
 // CSRF token generation
 if (!isset($_SESSION['csrf_token'])) {
@@ -25,7 +26,7 @@ $username_email = $form_data['username_email'] ?? '';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Todo App</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="<?php echo asset_url('style.css'); ?>">
 </head>
 
 <body>
@@ -78,7 +79,7 @@ $username_email = $form_data['username_email'] ?? '';
             </p>
         </div>
     </div>
-    <script src="script.js"></script>
+    <script src="<?php echo asset_url('script.js'); ?>"></script>
 </body>
 
 </html>

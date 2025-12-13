@@ -4,6 +4,22 @@
  */
 
 /**
+ * Generate a cache-busted asset URL using file modification timestamp.
+ * Appends ?v=TIMESTAMP to the asset path to force browser cache invalidation
+ * when the file changes.
+ * 
+ * @param string $path Relative path to the asset from the project root (e.g., 'style.css')
+ * @return string The asset path with version query string
+ */
+function asset_url($path) {
+    $file_path = __DIR__ . '/../' . $path;
+    if (file_exists($file_path)) {
+        return $path . '?v=' . filemtime($file_path);
+    }
+    return $path;
+}
+
+/**
  * Sanitize HTML content using DOMDocument
  * Allows only whitelisted tags and attributes to prevent XSS.
  * 
