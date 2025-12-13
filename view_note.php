@@ -3,6 +3,9 @@
 session_start();
 require_once 'db_connect.php';
 
+// Include helper functions
+require_once 'includes/functions.php';
+
 // Session protection - redirect if not authenticated
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -11,6 +14,9 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 $username = $_SESSION['username'] ?? 'User';
+
+// Content Security Policy
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.quilljs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.quilljs.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:;");
 
 // Get note ID from URL
 $note_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
@@ -138,14 +144,21 @@ try {
             </div>
 
             <div class="note-view-content">
-                <?php echo $note['content']; ?>
+                <?php echo sanitize_html($note['content']); ?>
             </div>
+
+            <form id="delete-note-form" action="delete_note.php" method="POST" style="display: none;">
+                <input type="hidden" name="id" value="<?php echo $note['id']; ?>">
+                <input type="hidden" name="csrf_token"
+                    value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
+            </form>
 
             <div class="note-actions-bar">
                 <a href="notes.php" class="btn btn-ghost">← Back to Notes</a>
                 <a href="edit_note.php?id=<?php echo $note['id']; ?>" class="btn btn-primary">Edit Note</a>
-                <a href="delete_note.php?id=<?php echo $note['id']; ?>" class="btn btn-ghost"
-                    onclick="return confirm('Are you sure you want to delete this note?');">Delete Note</a>
+                <button class="btn btn-ghost"
+                    onclick="if(confirm('Are you sure you want to delete this note?')) document.getElementById('delete-note-form').submit();">Delete
+                    Note</button>
             </div>
         </div>
     </div>

@@ -95,9 +95,12 @@ if (!$note) {
     exit();
 }
 
+// Include helper functions
+require_once 'includes/functions.php';
+
 // Get and validate inputs
 $title = trim($_POST['title'] ?? '');
-$content = trim($_POST['content'] ?? '');
+$content = sanitize_html(trim($_POST['content'] ?? ''));
 $color = trim($_POST['color'] ?? '#ffffff');
 $is_pinned = isset($_POST['is_pinned']) ? 1 : 0;
 $is_archived = isset($_POST['is_archived']) ? 1 : 0;
@@ -148,7 +151,7 @@ if (!$update_stmt) {
     exit();
 }
 
-$update_stmt->bind_param("sssiiII", $title, $content, $color, $is_pinned, $is_archived, $note_id, $user_id);
+$update_stmt->bind_param("sssiiii", $title, $content, $color, $is_pinned, $is_archived, $note_id, $user_id);
 
 if ($update_stmt->execute()) {
     if ($update_stmt->affected_rows > 0) {

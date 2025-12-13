@@ -41,6 +41,12 @@ $color = trim($_POST['color'] ?? '#ffffff');
 $is_pinned = isset($_POST['is_pinned']) ? 1 : 0;
 $is_archived = isset($_POST['is_archived']) ? 1 : 0;
 
+// Include helper functions
+require_once 'includes/functions.php';
+
+// Sanitize content
+$content = sanitize_html(trim($_POST['content'] ?? ''));
+
 // Validate title
 if (empty($title)) {
     $_SESSION['error_message'] = 'Title is required.';

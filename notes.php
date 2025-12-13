@@ -261,7 +261,11 @@ try {
         </section>
     </div>
 
+    </div>
+
     <script>
+        const csrfToken = "<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>";
+
         // Search functionality
         document.getElementById('search').addEventListener('input', function (e) {
             const searchTerm = e.target.value.toLowerCase();
@@ -292,7 +296,24 @@ try {
         // Delete note
         function deleteNote(noteId) {
             if (confirm('Are you sure you want to delete this note?')) {
-                window.location.href = `delete_note.php?id=${noteId}`;
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'delete_note.php';
+
+                const idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.name = 'id';
+                idInput.value = noteId;
+
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrf_token';
+                csrfInput.value = csrfToken;
+
+                form.appendChild(idInput);
+                form.appendChild(csrfInput);
+                document.body.appendChild(form);
+                form.submit();
             }
         }
 

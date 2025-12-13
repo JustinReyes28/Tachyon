@@ -39,6 +39,13 @@ class EmailNotifier
         $this->mailer->SMTPSecure = SMTP_ENCRYPTION === 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
         $this->mailer->Port = SMTP_PORT;
 
+        // Set timeouts to prevent hung processes
+        $this->mailer->Timeout = 30;
+        $smtp = $this->mailer->getSMTPInstance();
+        if ($smtp) {
+            $smtp->Timelimit = 10;
+        }
+
         // Default sender
         $this->mailer->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
         $this->mailer->isHTML(true);
