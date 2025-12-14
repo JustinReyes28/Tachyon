@@ -41,15 +41,15 @@ if ($note_id <= 0) {
     exit();
 }
 
-// 4. Delete the note
+// 4. Soft delete the note
 try {
-    $delete_stmt = $conn->prepare("DELETE FROM notes WHERE id = ? AND user_id = ?");
+    $delete_stmt = $conn->prepare("UPDATE notes SET is_trashed = 1, trashed_at = NOW() WHERE id = ? AND user_id = ?");
     if ($delete_stmt) {
         $delete_stmt->bind_param("ii", $note_id, $user_id);
 
         if ($delete_stmt->execute()) {
             if ($delete_stmt->affected_rows > 0) {
-                $_SESSION['success_message'] = "Note deleted successfully.";
+                $_SESSION['success_message'] = "Note moved to trash.";
             } else {
                 // No rows affected means either note doesn't exist or doesn't belong to user
                 $_SESSION['error_message'] = "Note not found or permission denied.";

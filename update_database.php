@@ -95,6 +95,44 @@ try {
         }
     }
 
+    // Add soft delete columns to todos table
+    $todos_trash_columns = [
+        'is_trashed' => "TINYINT(1) DEFAULT 0",
+        'trashed_at' => "DATETIME DEFAULT NULL"
+    ];
+
+    foreach ($todos_trash_columns as $column => $definition) {
+        $result = $conn->query("SHOW COLUMNS FROM todos LIKE '$column'");
+        if ($result && $result->num_rows === 0) {
+            $sql = "ALTER TABLE todos ADD COLUMN $column $definition";
+            if ($conn->query($sql) === TRUE) {
+                echo "✓ Added column '$column' to todos table\n";
+                $updates[] = "Added $column to todos";
+            } else {
+                echo "✗ Error adding '$column' to todos: " . $conn->error . "\n";
+            }
+        }
+    }
+
+    // Add soft delete columns to notes table
+    $notes_trash_columns = [
+        'is_trashed' => "TINYINT(1) DEFAULT 0",
+        'trashed_at' => "DATETIME DEFAULT NULL"
+    ];
+
+    foreach ($notes_trash_columns as $column => $definition) {
+        $result = $conn->query("SHOW COLUMNS FROM notes LIKE '$column'");
+        if ($result && $result->num_rows === 0) {
+            $sql = "ALTER TABLE notes ADD COLUMN $column $definition";
+            if ($conn->query($sql) === TRUE) {
+                echo "✓ Added column '$column' to notes table\n";
+                $updates[] = "Added $column to notes";
+            } else {
+                echo "✗ Error adding '$column' to notes: " . $conn->error . "\n";
+            }
+        }
+    }
+
     // Close the connection
     $conn->close();
 

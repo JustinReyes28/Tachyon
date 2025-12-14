@@ -135,7 +135,7 @@ if ($search !== null && strlen($search) > 200) {
 // Build dynamic query safely
 $sql = "SELECT id, task, description, status, priority, due_date, created_at, updated_at
         FROM todos
-        WHERE user_id = ?";
+        WHERE user_id = ? AND is_trashed = 0";
 $params = [$user_id];
 $types = "i";
 
@@ -226,7 +226,7 @@ while ($row = $result->fetch_assoc()) {
 $stmt->close();
 
 // Get total count for pagination
-$count_sql = "SELECT COUNT(*) as total FROM todos WHERE user_id = ?";
+$count_sql = "SELECT COUNT(*) as total FROM todos WHERE user_id = ? AND is_trashed = 0";
 $count_params = [$user_id];
 $count_types = "i";
 

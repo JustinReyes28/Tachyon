@@ -38,15 +38,15 @@ if (!$todo_id || $todo_id <= 0) {
     exit();
 }
 
-// Delete todo - ensuring user ownership (CRITICAL: prevents unauthorized deletion)
-$stmt = $conn->prepare("DELETE FROM todos WHERE id = ? AND user_id = ?");
+// Soft delete todo
+$stmt = $conn->prepare("UPDATE todos SET is_trashed = 1, trashed_at = NOW() WHERE id = ? AND user_id = ?");
 
 if ($stmt) {
     $stmt->bind_param("ii", $todo_id, $user_id);
 
     if ($stmt->execute()) {
         if ($stmt->affected_rows > 0) {
-            $_SESSION['success_message'] = 'Task deleted successfully!';
+            $_SESSION['success_message'] = 'Task moved to trash.';
         } else {
             // No rows affected - either doesn't exist or doesn't belong to user
             $_SESSION['error_message'] = 'Task not found or access denied.';

@@ -28,7 +28,7 @@ $notes = [];
 try {
     $stmt = $conn->prepare("SELECT id, title, content, color, is_pinned, is_archived, created_at, updated_at 
                             FROM notes 
-                            WHERE user_id = ? AND is_archived = 0 
+                            WHERE user_id = ? AND is_archived = 0 AND is_trashed = 0
                             ORDER BY is_pinned DESC, updated_at DESC");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
@@ -208,6 +208,14 @@ try {
             <div class="user-nav">
                 <span class="user-welcome"><?php echo htmlspecialchars($username); ?></span>
                 <a href="dashboard.php" class="btn btn-sm">Dashboard</a>
+                <a href="trash.php" class="btn btn-sm">
+                    Trash 
+                    <?php
+                    $trash_count = get_trash_count($conn, $user_id);
+                    if ($trash_count > 0)
+                        echo "($trash_count)";
+                    ?>
+                </a>
                 <a href="logout.php" class="btn btn-sm">Logout</a>
             </div>
         </header>
