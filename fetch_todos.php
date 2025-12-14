@@ -166,8 +166,19 @@ if ($sort_by === 'priority') {
         "CASE priority WHEN 'low' THEN 1 WHEN 'medium' THEN 2 WHEN 'high' THEN 3 END";
     $sql .= " ORDER BY $priority_order, created_at DESC";
 } else {
-    // These are validated against whitelist, safe to interpolate
-    $sql .= " ORDER BY $sort_by $sort_order";
+    // Use a mapping approach to ensure only allowed columns are used
+    $allowed_sort_columns = [
+        'created_at' => 'created_at',
+        'due_date' => 'due_date',
+        'priority' => 'priority',
+        'status' => 'status',
+        'task' => 'task'
+    ];
+
+    $safe_column = $allowed_sort_columns[$sort_by] ?? 'priority'; // fallback to priority
+    $safe_order = $sort_order === 'DESC' ? 'DESC' : 'ASC'; // only allow ASC or DESC
+
+    $sql .= " ORDER BY $safe_column $safe_order";
 }
 
 // Add pagination
