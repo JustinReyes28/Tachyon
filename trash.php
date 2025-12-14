@@ -27,12 +27,34 @@ $cleanup_days = 30;
 $cutoff_date = date('Y-m-d H:i:s', strtotime("-$cleanup_days days"));
 
 // Cleanup todos
-$conn->query("DELETE FROM todos WHERE user_id = $user_id AND is_trashed = 1 AND trashed_at < '$cutoff_date'");
-$cleanup_count += $conn->affected_rows;
+$stmt_todos = $conn->prepare("DELETE FROM todos WHERE user_id = ? AND is_trashed = 1 AND trashed_at < ?");
+if ($stmt_todos) {
+    $user_id_int = (int) $user_id;
+    $stmt_todos->bind_param("is", $user_id_int, $cutoff_date);
+    if ($stmt_todos->execute()) {
+        $cleanup_count += $stmt_todos->affected_rows;
+    } else {
+        error_log("Trash cleanup error (todos): " . $stmt_todos->error);
+    }
+    $stmt_todos->close();
+} else {
+    error_log("Failed to prepare todos statement: " . $conn->error);
+}
 
 // Cleanup notes
-$conn->query("DELETE FROM notes WHERE user_id = $user_id AND is_trashed = 1 AND trashed_at < '$cutoff_date'");
-$cleanup_count += $conn->affected_rows;
+$stmt_notes = $conn->prepare("DELETE FROM notes WHERE user_id = ? AND is_trashed = 1 AND trashed_at < ?");
+if ($stmt_notes) {
+    $user_id_int = (int) $user_id;
+    $stmt_notes->bind_param("is", $user_id_int, $cutoff_date);
+    if ($stmt_notes->execute()) {
+        $cleanup_count += $stmt_notes->affected_rows;
+    } else {
+        error_log("Trash cleanup error (notes): " . $stmt_notes->error);
+    }
+    $stmt_notes->close();
+} else {
+    error_log("Failed to prepare notes statement: " . $conn->error);
+}
 
 // Fetch Trashed Todos
 $trashed_todos = [];
@@ -224,7 +246,8 @@ if ($cleanup_count > 0) {
                             <div class="trash-item-content">
                                 <div class="trash-item-title"><?php echo htmlspecialchars($todo['task']); ?></div>
                                 <div class="trash-item-meta">Deleted:
-                                    <?php echo date('M j, Y H:i', strtotime($todo['trashed_at'])); ?></div>
+                                    <?php echo date('M j, Y H:i', strtotime($todo['trashed_at'])); ?>
+                                </div>
                             </div>
                             <div class="trash-actions">
                                 <form action="restore_todo.php" method="POST">
@@ -254,7 +277,8 @@ if ($cleanup_count > 0) {
                             <div class="trash-item-content">
                                 <div class="trash-item-title"><?php echo htmlspecialchars($note['title']); ?></div>
                                 <div class="trash-item-meta">Deleted:
-                                    <?php echo date('M j, Y H:i', strtotime($note['trashed_at'])); ?></div>
+                                    <?php echo date('M j, Y H:i', strtotime($note['trashed_at'])); ?>
+                                </div>
                             </div>
                             <div class="trash-actions">
                                 <form action="restore_note.php" method="POST">

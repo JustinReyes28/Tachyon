@@ -46,7 +46,7 @@ if ($stmt) {
 
 // Calculate stats
 $total = count($todos);
-$completed = count(array_filter($todos, fn($t) => $t['status'] === 'completed'));
+$completed = count(array_filter($todos, function($t) { return $t['status'] === 'completed'; }));
 $pending = $total - $completed;
 ?>
 <!DOCTYPE html>
