@@ -45,7 +45,7 @@ try {
         $_SESSION['error_message'] = 'Invalid request. Please try again.';
         debug_log("CSRF validation failed");
         error_log("CSRF token validation failed (add_todo) [Request ID: $requestId]");
-        header('Location: dashboard.php');
+        header('Location: todos.php');
         exit();
     }
 
@@ -64,14 +64,14 @@ try {
     // Validate task
     if (empty($task)) {
         $_SESSION['error_message'] = 'Task is required.';
-        header('Location: dashboard.php');
+        header('Location: todos.php');
         exit();
     }
 
     // Validate task length
     if (strlen($task) > 1000) {
         $_SESSION['error_message'] = 'Task is too long. Maximum 1000 characters.';
-        header('Location: dashboard.php');
+        header('Location: todos.php');
         exit();
     }
 
@@ -149,7 +149,7 @@ try {
         $_SESSION['error_message'] = 'An internal error occurred. Please try again.';
     }
 
-    header('Location: dashboard.php');
+    header('Location: todos.php');
     exit();
 
 } catch (Throwable $e) {
