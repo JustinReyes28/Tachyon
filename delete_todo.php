@@ -21,7 +21,7 @@ $requestId = session_id() ?: bin2hex(random_bytes(16));
 if (!isset($_POST['csrf_token']) || !isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
     $_SESSION['error_message'] = 'Invalid request. Please try again.';
     error_log("CSRF token validation failed (delete_todo) [Request ID: $requestId]");
-    header('Location: dashboard.php');
+    header('Location: todos.php');
     exit();
 }
 
@@ -34,7 +34,7 @@ $todo_id = filter_input(INPUT_POST, 'todo_id', FILTER_VALIDATE_INT);
 // Validate todo_id
 if (!$todo_id || $todo_id <= 0) {
     $_SESSION['error_message'] = 'Invalid task.';
-    header('Location: dashboard.php');
+    header('Location: todos.php');
     exit();
 }
 
@@ -82,6 +82,6 @@ if ($stmt) {
     $_SESSION['error_message'] = 'An internal error occurred. Please try again.';
 }
 
-header('Location: dashboard.php');
+header('Location: todos.php');
 exit();
 ?>
