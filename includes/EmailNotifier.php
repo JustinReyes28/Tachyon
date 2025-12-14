@@ -84,17 +84,20 @@ class EmailNotifier
             // Format the due date for display
             $formattedDate = date('F j, Y', strtotime($dueDate));
 
-            // Replace placeholders
+            // Replace placeholders - sanitize all user inputs
             $body = str_replace(
                 ['{{username}}', '{{task_name}}', '{{due_date}}', '{{app_url}}'],
-                [htmlspecialchars($username), htmlspecialchars($taskName), $formattedDate, APP_URL],
+                [htmlspecialchars($username, ENT_NOQUOTES), htmlspecialchars($taskName, ENT_NOQUOTES), $formattedDate, htmlspecialchars(APP_URL, ENT_NOQUOTES)],
                 $template
             );
 
             $this->mailer->Body = $body;
 
-            // Plain text alternative
-            $this->mailer->AltBody = "Hi $username,\n\nThis is a reminder that your task \"$taskName\" is due on $formattedDate.\n\nVisit " . APP_URL . " to manage your tasks.\n\n- Tachyon Task Manager";
+            // Plain text alternative - sanitize user inputs to prevent injection
+            $this->mailer->AltBody = "Hi " . htmlspecialchars($username, ENT_NOQUOTES) . ",\n\n" .
+                                   "This is a reminder that your task \"" . htmlspecialchars($taskName, ENT_NOQUOTES) . "\" is due on $formattedDate.\n\n" .
+                                   "Visit " . htmlspecialchars(APP_URL, ENT_NOQUOTES) . " to manage your tasks.\n\n" .
+                                   "- Tachyon Task Manager";
 
             // Send the email
             $this->mailer->send();

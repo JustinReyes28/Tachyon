@@ -25,7 +25,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
 
 // Fetch user's todos
 $todos = [];
-$stmt = $conn->prepare("SELECT id, task, description, status, priority, due_date, created_at FROM todos WHERE user_id = ? ORDER BY
+$stmt = $conn->prepare("SELECT id, task, description, status, priority, due_date, created_at FROM todos WHERE user_id = ? AND is_trashed = 0 ORDER BY
     CASE priority
         WHEN 'high' THEN 1
         WHEN 'medium' THEN 2
@@ -71,6 +71,14 @@ $pending = $total - $completed;
             <div class="user-nav">
                 <span class="user-welcome"><?php echo htmlspecialchars($username); ?></span>
                 <a href="dashboard.php" class="btn btn-sm">Dashboard</a>
+                <a href="trash.php" class="btn btn-sm">
+                    Trash
+                    <?php
+                    $trash_count = get_trash_count($conn, $user_id);
+                    if ($trash_count > 0)
+                        echo "($trash_count)";
+                    ?>
+                </a>
                 <a href="logout.php" class="btn btn-sm">Logout</a>
             </div>
         </header>

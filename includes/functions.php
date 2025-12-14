@@ -195,4 +195,40 @@ function html_to_plain_text($html)
 
     return trim($text);
 }
+
+/**
+ * Get the count of trashed items for a user.
+ * 
+ * @param mysqli $conn Database connection
+ * @param int $user_id User ID
+ * @return int Total count of trashed todos and notes
+ */
+function get_trash_count($conn, $user_id)
+{
+    $count = 0;
+
+    // Count trashed todos
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM todos WHERE user_id = ? AND is_trashed = 1");
+    if ($stmt) {
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $stmt->bind_result($todos_count);
+        $stmt->fetch();
+        $stmt->close();
+        $count += $todos_count;
+    }
+
+    // Count trashed notes
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM notes WHERE user_id = ? AND is_trashed = 1");
+    if ($stmt) {
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $stmt->bind_result($notes_count);
+        $stmt->fetch();
+        $stmt->close();
+        $count += $notes_count;
+    }
+
+    return $count;
+}
 ?>

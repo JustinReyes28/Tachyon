@@ -135,7 +135,7 @@ if ($search !== null && strlen($search) > 200) {
 // Build dynamic query safely
 $sql = "SELECT id, task, description, status, priority, due_date, created_at, updated_at
         FROM todos
-        WHERE user_id = ?";
+        WHERE user_id = ? AND is_trashed = 0";
 $params = [$user_id];
 $types = "i";
 
@@ -166,8 +166,19 @@ if ($sort_by === 'priority') {
         "CASE priority WHEN 'low' THEN 1 WHEN 'medium' THEN 2 WHEN 'high' THEN 3 END";
     $sql .= " ORDER BY $priority_order, created_at DESC";
 } else {
-    // These are validated against whitelist, safe to interpolate
-    $sql .= " ORDER BY $sort_by $sort_order";
+    // Use a mapping approach to ensure only allowed columns are used
+    $allowed_sort_columns = [
+        'created_at' => 'created_at',
+        'due_date' => 'due_date',
+        'priority' => 'priority',
+        'status' => 'status',
+        'task' => 'task'
+    ];
+
+    $safe_column = $allowed_sort_columns[$sort_by] ?? 'priority'; // fallback to priority
+    $safe_order = $sort_order === 'DESC' ? 'DESC' : 'ASC'; // only allow ASC or DESC
+
+    $sql .= " ORDER BY $safe_column $safe_order";
 }
 
 // Add pagination
@@ -215,7 +226,7 @@ while ($row = $result->fetch_assoc()) {
 $stmt->close();
 
 // Get total count for pagination
-$count_sql = "SELECT COUNT(*) as total FROM todos WHERE user_id = ?";
+$count_sql = "SELECT COUNT(*) as total FROM todos WHERE user_id = ? AND is_trashed = 0";
 $count_params = [$user_id];
 $count_types = "i";
 

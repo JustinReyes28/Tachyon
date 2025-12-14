@@ -26,7 +26,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
 // Fetch active notes count
 $total_notes = 0;
 try {
-    $stmt = $conn->prepare("SELECT COUNT(*) FROM notes WHERE user_id = ? AND is_archived = 0");
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM notes WHERE user_id = ? AND is_archived = 0 AND is_trashed = 0");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $stmt->bind_result($total_notes);
@@ -40,7 +40,7 @@ try {
 // Fetch recent notes
 $recent_notes = [];
 try {
-    $stmt = $conn->prepare("SELECT id, title, content, created_at, is_pinned FROM notes WHERE user_id = ? AND is_archived = 0 ORDER BY is_pinned DESC, updated_at DESC LIMIT 3");
+    $stmt = $conn->prepare("SELECT id, title, content, created_at, is_pinned FROM notes WHERE user_id = ? AND is_archived = 0 AND is_trashed = 0 ORDER BY is_pinned DESC, updated_at DESC LIMIT 3");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -168,6 +168,15 @@ try {
                 <a href="todos.php" class="nav-btn">[ToDos]</a>
                 <a href="create_note.php" class="nav-btn">[Notes]</a>
                 <a href="profile.php" class="nav-btn">[Profile]</a>
+                <a href="trash.php" class="nav-btn">
+                    [Trash]
+                    <?php
+                    $trash_count = get_trash_count($conn, $user_id);
+                    if ($trash_count > 0):
+                        ?>
+                            <span class="trash-badge"><?php echo $trash_count; ?></span>
+                    <?php endif; ?>
+                </a>
             </div>
         </section>
 
