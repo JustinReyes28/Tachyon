@@ -951,6 +951,7 @@ a:hover {
     margin-bottom: var(--space-md);
     line-height: 1.5;
     transition: color var(--transition-normal);
+    white-space: pre-line;
 }
 
 .note-meta {

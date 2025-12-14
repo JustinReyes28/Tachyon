@@ -83,6 +83,20 @@ $sql_todos = "CREATE TABLE IF NOT EXISTS todos (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 )";
 
+// SQL to create notes table
+$sql_notes = "CREATE TABLE IF NOT EXISTS notes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    content LONGTEXT,
+    color VARCHAR(7) DEFAULT '#ffffff',
+    is_pinned BOOLEAN DEFAULT FALSE,
+    is_archived BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)";
+
 // Execute the queries
 if ($conn->query($sql_users) === TRUE) {
     echo "Users table created successfully or already exists.<br>";
@@ -114,6 +128,12 @@ if ($conn->query($sql_todos) === TRUE) {
     echo "Todos table created successfully or already exists.<br>";
 } else {
     echo "Error creating todos table: " . $conn->error . "<br>";
+}
+
+if ($conn->query($sql_notes) === TRUE) {
+    echo "Notes table created successfully or already exists.<br>";
+} else {
+    echo "Error creating notes table: " . $conn->error . "<br>";
 }
 
 // Close the connection
