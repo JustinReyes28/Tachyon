@@ -47,11 +47,8 @@ try {
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notes - Tachyon</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?php echo asset_url('style.css'); ?>">
+    <?php include 'includes/head.php'; ?>
     <style>
         .notes-grid {
             display: grid;
@@ -209,7 +206,7 @@ try {
                 <span class="user-welcome"><?php echo htmlspecialchars($username); ?></span>
                 <a href="dashboard.php" class="btn btn-sm">Dashboard</a>
                 <a href="trash.php" class="btn btn-sm">
-                    Trash 
+                    Trash
                     <?php
                     $trash_count = get_trash_count($conn, $user_id);
                     if ($trash_count > 0)
