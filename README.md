@@ -1,4 +1,4 @@
-# Tachyon - Advanced ToDo Application
+# Tachyon - Advanced ToDo & Notes Application
 
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
@@ -9,17 +9,18 @@
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Visit_Tachyon-4CAF50?style=for-the-badge)](https://tachyon.rf.gd/)
 
-> A feature-rich ToDo application built with HTML, CSS, JavaScript, PHP, and MySQL database integration. Hosted on InfinityFree with custom authentication system.
+> A feature-rich ToDo and Notes application built with HTML, CSS, JavaScript, PHP, and MySQL database integration. Hosted on InfinityFree with custom authentication system.
 
 ## ✨ Features
 
 - **🔐 Secure Authentication**: Robust login and registration system with password hashing
-- **💾 Persistent Storage**: MySQL database for reliable todo item storage
+- **💾 Persistent Storage**: MySQL database for reliable data storage
 - **📱 Responsive Design**: Clean, modern interface accessible on all devices
-- **⚡ Dynamic Interactions**: Real-time todo management powered by JavaScript
+- **⚡ Dynamic Interactions**: Real-time management powered by JavaScript
 - **🛡️ Security**: Protection against SQL injection and secure session management
-- **� Rich Text Editing**: Google Notes-like functionality empowered by Quill.js
-- **�🚀 Deployed Solution**: Actively hosted on InfinityFree platform
+- **📝 Notes Management**: Create, edit, and organize rich text notes
+- **✨ Rich Text Editing**: Google Notes-like functionality empowered by Quill.js
+- **🚀 Deployed Solution**: Actively hosted on InfinityFree platform
 
 ## 🛠️ Technologies Used
 
@@ -43,6 +44,10 @@ Tachyon-Todo-App/
 ├── register.php           # User registration
 ├── login.php              # User login
 ├── dashboard.php          # Todo dashboard
+├── notes.php              # Notes dashboard
+├── create_note.php        # Create new note
+├── view_note.php          # View note details
+├── edit_note.php          # Edit existing note
 ├── db_connect.php         # Database connection
 ├── init_database.php      # Database initialization
 ├── fetch_todos.php        # API: Fetch todos
@@ -50,6 +55,9 @@ Tachyon-Todo-App/
 ├── complete_todo.php      # API: Mark todo as complete
 ├── update_todo.php        # API: Update todo
 ├── delete_todo.php        # API: Delete todo
+├── save_note.php          # API: Save new note
+├── update_note.php        # API: Update note
+├── delete_note.php        # API: Delete note
 ├── login_process.php      # Handle login logic
 ├── register_process.php   # Handle registration logic
 ├── logout.php             # Handle logout
@@ -84,6 +92,7 @@ Tachyon-Todo-App/
      CREATE TABLE users (
          id INT AUTO_INCREMENT PRIMARY KEY,
          username VARCHAR(50) UNIQUE NOT NULL,
+         email VARCHAR(100) UNIQUE NOT NULL,
          password VARCHAR(255) NOT NULL,
          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
      );
@@ -92,9 +101,26 @@ Tachyon-Todo-App/
          id INT AUTO_INCREMENT PRIMARY KEY,
          user_id INT NOT NULL,
          title VARCHAR(255) NOT NULL,
-         completed BOOLEAN DEFAULT FALSE,
+         description TEXT,
+         priority ENUM('low', 'medium', 'high') DEFAULT 'medium',
+         status ENUM('pending', 'in_progress', 'completed') DEFAULT 'pending',
+         due_date DATE,
          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-         FOREIGN KEY (user_id) REFERENCES users(id)
+         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+     );
+
+     CREATE TABLE notes (
+         id INT AUTO_INCREMENT PRIMARY KEY,
+         user_id INT NOT NULL,
+         title VARCHAR(255) NOT NULL,
+         content LONGTEXT,
+         color VARCHAR(7) DEFAULT '#ffffff',
+         is_pinned BOOLEAN DEFAULT FALSE,
+         is_archived BOOLEAN DEFAULT FALSE,
+         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
      );
      ```
 

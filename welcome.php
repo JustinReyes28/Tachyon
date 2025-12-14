@@ -1,6 +1,7 @@
 <?php
 // welcome.php
 session_start();
+require_once 'includes/functions.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -18,7 +19,7 @@ $username = $_SESSION['username'] ?? 'User';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome - Todo App</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="<?php echo asset_url('style.css'); ?>">
 </head>
 
 <body>
