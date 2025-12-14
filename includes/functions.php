@@ -157,4 +157,42 @@ function sanitize_html($html)
     libxml_clear_errors();
     return trim($clean_html);
 }
+
+/**
+ * Convert HTML content to plain text while preserving line breaks.
+ * Converts block-level HTML elements to line breaks before stripping tags.
+ * 
+ * @param string $html The input HTML string
+ * @return string Plain text with line breaks preserved
+ */
+function html_to_plain_text($html)
+{
+    if (empty($html)) {
+        return '';
+    }
+
+    // Replace block-level elements with line breaks
+    $html = preg_replace('/<\/p>/i', "\n", $html);
+    $html = preg_replace('/<p[^>]*>/i', '', $html);
+    $html = preg_replace('/<br\s*\/?>/i', "\n", $html);
+    $html = preg_replace('/<\/div>/i', "\n", $html);
+    $html = preg_replace('/<div[^>]*>/i', '', $html);
+    $html = preg_replace('/<\/li>/i', "\n", $html);
+    $html = preg_replace('/<\/h[1-6]>/i', "\n", $html);
+    $html = preg_replace('/<\/blockquote>/i', "\n", $html);
+
+    // Strip remaining HTML tags
+    $text = strip_tags($html);
+
+    // Decode HTML entities
+    $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+    // Normalize whitespace (collapse multiple spaces but preserve line breaks)
+    $text = preg_replace('/[^\S\n]+/', ' ', $text);
+
+    // Remove excessive line breaks (more than 2 consecutive)
+    $text = preg_replace('/\n{3,}/', "\n\n", $text);
+
+    return trim($text);
+}
 ?>

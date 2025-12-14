@@ -106,6 +106,7 @@ try {
             max-height: 150px;
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: pre-line;
         }
 
         .note-meta {
@@ -217,7 +218,7 @@ try {
                             <h3 class="note-title"><?php echo htmlspecialchars($note['title']); ?></h3>
                             <div class="note-preview">
                                 <?php
-                                $plainText = strip_tags($note['content']);
+                                $plainText = html_to_plain_text($note['content']);
                                 $preview = mb_strlen($plainText) > 200 ? mb_substr($plainText, 0, 200) . '...' : $plainText;
                                 echo htmlspecialchars($preview);
                                 ?>
