@@ -12,9 +12,10 @@ if (!isset($_SESSION['csrf_token'])) {
 $errors = $_SESSION['errors'] ?? [];
 $form_data = $_SESSION['form_data'] ?? [];
 $success_message = $_SESSION['success_message'] ?? '';
+$show_resend_link = $_SESSION['show_resend_link'] ?? false;
 
 // Clear session variables so they don't persist on refresh
-unset($_SESSION['errors'], $_SESSION['form_data'], $_SESSION['success_message']);
+unset($_SESSION['errors'], $_SESSION['form_data'], $_SESSION['success_message'], $_SESSION['show_resend_link'], $_SESSION['unverified_email']);
 
 $username_email = $form_data['username_email'] ?? '';
 ?>
@@ -53,6 +54,12 @@ $username_email = $form_data['username_email'] ?? '';
                         </ul>
                     <?php endif; ?>
                 </div>
+                <?php if ($show_resend_link): ?>
+                    <p style="text-align: center; margin-bottom: 1rem;">
+                        <a href="resend_verification.php" style="color: #667eea; font-weight: 500;">Resend verification
+                            email</a>
+                    </p>
+                <?php endif; ?>
             <?php endif; ?>
 
             <form action="login_process.php" method="post" class="needs-validation">
