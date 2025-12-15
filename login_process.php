@@ -54,8 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if (password_verify($password, $db_password_hash)) {
                             // Check if email is verified
                             if (!$email_verified) {
-                                $errors[] = "Please verify your email before logging in. Check your inbox for the verification link.";
-                                $_SESSION['unverified_email'] = $db_email;
+                                $errors[] = "Please verify your email before logging in. Check your inbox for the verification code.";
+                                $_SESSION['pending_verification_email'] = $db_email;
                                 $_SESSION['show_resend_link'] = true;
                             } else {
                                 // Success: Login
