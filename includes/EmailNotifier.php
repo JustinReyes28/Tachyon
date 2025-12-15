@@ -95,9 +95,9 @@ class EmailNotifier
 
             // Plain text alternative - sanitize user inputs to prevent injection
             $this->mailer->AltBody = "Hi " . htmlspecialchars($username, ENT_NOQUOTES) . ",\n\n" .
-                                   "This is a reminder that your task \"" . htmlspecialchars($taskName, ENT_NOQUOTES) . "\" is due on $formattedDate.\n\n" .
-                                   "Visit " . htmlspecialchars(APP_URL, ENT_NOQUOTES) . " to manage your tasks.\n\n" .
-                                   "- Tachyon Task Manager";
+                "This is a reminder that your task \"" . htmlspecialchars($taskName, ENT_NOQUOTES) . "\" is due on $formattedDate.\n\n" .
+                "Visit " . htmlspecialchars(APP_URL, ENT_NOQUOTES) . " to manage your tasks.\n\n" .
+                "- Tachyon Task Manager";
 
             // Send the email
             $this->mailer->send();
@@ -139,6 +139,62 @@ class EmailNotifier
 
         } catch (Exception $e) {
             error_log("EmailNotifier: SMTP connection test exception - " . $e->getMessage());
+            return false;
+        }
+    }
+    /**
+     * Send a verification email
+     *
+     * @param string $userEmail Recipient email address
+     * @param string $username Recipient's username
+     * @param string $verificationLink Verification URL
+     * @return bool True on success, false on failure
+     */
+    public function sendVerificationEmail($userEmail, $username, $verificationLink)
+    {
+        try {
+            // Clear previous recipients
+            $this->mailer->clearAddresses();
+            $this->mailer->addAddress($userEmail, $username);
+
+            // Set subject
+            $this->mailer->Subject = "Verify your email address - Tachyon";
+
+            // Load and process template
+            $templateFile = $this->templateDir . 'verification_email.html';
+
+            if (!file_exists($templateFile)) {
+                error_log("EmailNotifier: Template not found at $templateFile");
+                return false;
+            }
+
+            $template = file_get_contents($templateFile);
+
+            // Replace placeholders
+            // Note: complex links might need careful handling, but generally htmlspecialchars is safer for HTML output
+            $body = str_replace(
+                ['{{username}}', '{{verification_link}}'],
+                [htmlspecialchars($username, ENT_NOQUOTES), htmlspecialchars($verificationLink, ENT_NOQUOTES)],
+                $template
+            );
+
+            $this->mailer->Body = $body;
+
+            // Plain text alternative
+            $this->mailer->AltBody = "Hi " . htmlspecialchars($username, ENT_NOQUOTES) . ",\n\n" .
+                "Welcome to Tachyon Task Manager!\n\n" .
+                "Please verify your email address by clicking the link below:\n" .
+                "$verificationLink\n\n" .
+                "If you didn't create an account, you can ignore this email.\n\n" .
+                "- Tachyon Task Manager";
+
+            // Send the email
+            $this->mailer->send();
+
+            return true;
+
+        } catch (Exception $e) {
+            error_log("EmailNotifier Error: Failed to send verification email to $userEmail. Error: " . $this->mailer->ErrorInfo);
             return false;
         }
     }
