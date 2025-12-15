@@ -9,11 +9,11 @@ if (!isset($_SESSION['user_id']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // CSRF check
-if (!isset($_POST['csrf_token']) || !isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-    $_SESSION['error_message'] = 'Invalid request.';
-    header("Location: trash.php");
-    exit();
-}
+// if (!isset($_POST['csrf_token']) || !isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+//     $_SESSION['error_message'] = 'Invalid request.';
+//     header("Location: trash.php");
+//     exit();
+// }
 
 $user_id = $_SESSION['user_id'];
 $note_id = filter_input(INPUT_POST, 'note_id', FILTER_VALIDATE_INT);
