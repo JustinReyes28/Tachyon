@@ -7,7 +7,7 @@
  */
 session_start();
 require_once 'db_connect.php';
-require_once 'mailer.php';
+require_once 'includes/EmailNotifier.php';
 require_once 'includes/functions.php';
 
 // CSRF token generation
@@ -51,15 +51,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Don't reveal if email is verified - use generic message
                     $success_message = "If an account exists with this email and is not verified, a verification email has been sent.";
                 } else {
-                    // Rate limiting: Check if last update was less than 2 minutes ago
+                    // Rate limiting: Check if last update was less than 30 seconds ago
                     $lastUpdate = strtotime($user['updated_at']);
                     $now = time();
                     $timeDiff = $now - $lastUpdate;
 
-                    if ($timeDiff < 120 && !empty($user['verification_token'])) {
+                    if ($timeDiff < 30 && !empty($user['verification_token'])) {
                         // Rate limited
-                        $waitTime = 120 - $timeDiff;
-                        $errors[] = "Please wait " . ceil($waitTime / 60) . " minute(s) before requesting another verification email.";
+                        $waitTime = 30 - $timeDiff;
+                        $errors[] = "Please wait $waitTime seconds before requesting another verification email.";
                     } else {
                         // Generate new token
                         $newToken = bin2hex(random_bytes(32));
@@ -70,10 +70,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                             if ($updateStmt->execute()) {
                                 // Send verification email
-                                $verifyLink = "https://tachyon.rf.gd/verify_email.php?token=$newToken";
+                                $baseUrl = defined('APP_URL') ? APP_URL : "https://tachyon.rf.gd";
+                                $verifyLink = "$baseUrl/verify_email.php?token=$newToken";
 
                                 try {
-                                    if (sendVerificationEmail($email, $verifyLink)) {
+                                    $emailNotifier = new EmailNotifier();
+                                    if ($emailNotifier->sendVerificationEmail($email, $user['username'], $verifyLink)) {
                                         $success_message = "A new verification email has been sent. Please check your inbox.";
                                     } else {
                                         $errors[] = "Failed to send verification email. Please try again later.";

@@ -17,7 +17,7 @@ $show_resend_link = false;
 
 if (isset($_GET['token']) && !empty($_GET['token'])) {
     $token = trim($_GET['token']);
-    
+
     // Validate token format (should be 64 hex characters)
     if (!preg_match('/^[a-f0-9]{64}$/i', $token)) {
         $message = "Invalid verification token format.";
@@ -39,8 +39,8 @@ if (isset($_GET['token']) && !empty($_GET['token'])) {
                     $message = "Your email has already been verified. You can login to your account.";
                     $show_login_link = true;
                 } else {
-                    // Update user to verified and clear/consume the token
-                    $updateStmt = $conn->prepare("UPDATE users SET email_verified = 1, verification_token = NULL WHERE id = ?");
+                    // Update user to verified but modifiers: keep the token to allow "Already Verified" check
+                    $updateStmt = $conn->prepare("UPDATE users SET email_verified = 1 WHERE id = ?");
                     if ($updateStmt) {
                         $updateStmt->bind_param("i", $userId);
                         if ($updateStmt->execute()) {
@@ -158,7 +158,8 @@ if (isset($_GET['token']) && !empty($_GET['token'])) {
                     <a href="resend_verification.php" class="btn btn-primary">Resend Verification Email</a>
                 <?php endif; ?>
 
-                <a href="index.php" class="btn" style="background: transparent; border: 2px solid var(--color-black);">Back to Home</a>
+                <a href="index.php" class="btn"
+                    style="background: transparent; border: 2px solid var(--color-black);">Back to Home</a>
             </div>
         </div>
     </div>

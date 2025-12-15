@@ -3,7 +3,7 @@
 // register_process.php
 session_start();
 require_once 'db_connect.php';
-require_once 'mailer.php';
+require_once 'includes/EmailNotifier.php';
 
 // Check if data was submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -115,10 +115,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($stmt->execute()) {
                 // Send verification email
-                $verifyLink = "https://tachyon.rf.gd/verify_email.php?token=$verification_token";
+                // Determine protocol and host dynamically
+                $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+                $host = $_SERVER['HTTP_HOST'];
+                // Check if we are in a subdirectory (common in XAMPP)
+                $script_dir = dirname($_SERVER['PHP_SELF']);
+                // Remove backslashes for Windows paths if needed, though PHP_SELF usually has forward slashes
+                $script_dir = str_replace('\\', '/', $script_dir);
+                // Ensure no trailing slash
+                $script_dir = rtrim($script_dir, '/');
+
+                $baseUrl = "$protocol://$host$script_dir";
+                $verifyLink = "$baseUrl/verify_email.php?token=$verification_token";
 
                 try {
-                    if (sendVerificationEmail($email, $verifyLink)) {
+                    $emailNotifier = new EmailNotifier();
+                    if ($emailNotifier->sendVerificationEmail($email, $username, $verifyLink)) {
                         $_SESSION['success_message'] = "Registration successful! Please check your email to verify your account.";
                     } else {
                         // Email failed but user was created - still allow login but notify
