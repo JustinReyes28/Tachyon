@@ -37,7 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Invalid email format.";
     } else {
         // Check if user exists and is not verified
-        $stmt = $conn->prepare("SELECT id, username, email_verified, verification_token, updated_at FROM users WHERE email = ?");
+        // Use TIMESTAMPDIFF to let the database handle time calculations (avoids timezone mismatches between PHP and DB)
+        $stmt = $conn->prepare("SELECT id, username, email_verified, verification_token, TIMESTAMPDIFF(SECOND, updated_at, NOW()) as time_since_update FROM users WHERE email = ?");
         if ($stmt) {
             $stmt->bind_param("s", $email);
             $stmt->execute();
@@ -52,11 +53,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $success_message = "If an account exists with this email and is not verified, a verification email has been sent.";
                 } else {
                     // Rate limiting: Check if last update was less than 30 seconds ago
-                    $lastUpdate = strtotime($user['updated_at']);
-                    $now = time();
-                    $timeDiff = $now - $lastUpdate;
+                    // We use the DB-calculated difference
+                    $timeDiff = (int) $user['time_since_update'];
 
-                    if ($timeDiff < 30 && !empty($user['verification_token'])) {
+                    if ($timeDiff >= 0 && $timeDiff < 30 && !empty($user['verification_token'])) {
                         // Rate limited
                         $waitTime = 30 - $timeDiff;
                         $errors[] = "Please wait $waitTime seconds before requesting another verification email.";
