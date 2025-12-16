@@ -49,14 +49,16 @@
         .code-display {
             background-color: #333333;
             color: #ffffff;
-            display: inline-block;
+            display: block;
+            width: fit-content;
+            margin: 20px auto;
             padding: 20px 50px;
             border-radius: 8px;
-            margin: 20px 0;
             font-size: 36px;
             font-weight: 700;
             letter-spacing: 8px;
             font-family: 'Courier New', monospace;
+            text-align: center;
         }
         .warning-card {
             background-color: #f8f8f8;
@@ -102,9 +104,7 @@
         <div class="content">
             <p>Hi <strong>{{username}}</strong>,</p>
             <p>Thank you for registering with Tachyon! To complete your registration and activate your account, please enter the verification code below:</p>
-            <div style="text-align: center;">
-                <div class="code-display">{{verification_code}}</div>
-            </div>
+            <div class="code-display">{{verification_code}}</div>
             <div class="warning-card">
                 <p><strong>⏱️ This code expires in 10 minutes.</strong><br>
                 If you didn't request this code, you can safely ignore this email.</p>
