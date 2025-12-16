@@ -100,51 +100,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         // Hash password
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $verification_token = bin2hex(random_bytes(32));
-        $email_verified = 0; // Aligns with database_schema.sql column name
+
+        // Generate 6-digit verification code
+        $verification_code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $verification_code_expires = date('Y-m-d H:i:s', strtotime('+10 minutes'));
+        $email_verified = 0;
 
         try {
             $password_salt = ''; // PHP's password_hash() handles salting internally
-            $stmt = $conn->prepare("INSERT INTO users (username, email, password_hash, password_salt, email_verified, verification_token) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt = $conn->prepare("INSERT INTO users (username, email, password_hash, password_salt, email_verified, verification_code, verification_code_expires) VALUES (?, ?, ?, ?, ?, ?, ?)");
 
             if (!$stmt) {
                 throw new Exception("Failed to prepare insert statement: " . $conn->error);
             }
 
-            $stmt->bind_param("ssssis", $username, $email, $hashed_password, $password_salt, $email_verified, $verification_token);
+            $stmt->bind_param("sssssss", $username, $email, $hashed_password, $password_salt, $email_verified, $verification_code, $verification_code_expires);
 
             if ($stmt->execute()) {
-                // Send verification email
-                // Determine protocol and host dynamically
-                $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
-                $host = $_SERVER['HTTP_HOST'];
-                // Check if we are in a subdirectory (common in XAMPP)
-                $script_dir = dirname($_SERVER['PHP_SELF']);
-                // Remove backslashes for Windows paths if needed, though PHP_SELF usually has forward slashes
-                $script_dir = str_replace('\\', '/', $script_dir);
-                // Ensure no trailing slash
-                $script_dir = rtrim($script_dir, '/');
-
-                $baseUrl = "$protocol://$host$script_dir";
-                $verifyLink = "$baseUrl/verify_email.php?token=$verification_token";
-
+                // Send verification code email
                 try {
                     $emailNotifier = new EmailNotifier();
-                    if ($emailNotifier->sendVerificationEmail($email, $username, $verifyLink)) {
-                        $_SESSION['success_message'] = "Registration successful! Please check your email to verify your account.";
+                    if ($emailNotifier->sendVerificationCode($email, $username, $verification_code)) {
+                        // Store email in session for the verification page
+                        $_SESSION['pending_verification_email'] = $email;
+                        $_SESSION['success_message'] = "Registration successful! Please check your email for the verification code.";
                     } else {
-                        // Email failed but user was created - still allow login but notify
-                        $_SESSION['success_message'] = "Registration successful! There was an issue sending the verification email. Please contact support.";
-                        error_log("Failed to send verification email to: $email");
+                        $_SESSION['pending_verification_email'] = $email;
+                        $_SESSION['success_message'] = "Registration successful! There was an issue sending the verification email. Please try resending.";
+                        error_log("Failed to send verification code to: $email");
                     }
                 } catch (Exception $e) {
-                    // Catch any unexpected errors to prevent 500
-                    $_SESSION['success_message'] = "Registration successful! There was an issue sending the verification email. Please contact support.";
-                    error_log("Exception sending verification email: " . $e->getMessage());
+                    $_SESSION['pending_verification_email'] = $email;
+                    $_SESSION['success_message'] = "Registration successful! There was an issue sending the verification email. Please try resending.";
+                    error_log("Exception sending verification code: " . $e->getMessage());
                 }
 
                 $stmt->close();
-                header("Location: login.php");
+                header("Location: verify_code.php");
                 exit();
             } else {
                 throw new Exception("Execute failed: " . $stmt->error);

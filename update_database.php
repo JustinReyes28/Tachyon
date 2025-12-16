@@ -52,6 +52,8 @@ try {
         'reset_token_expires' => "DATETIME(6) NULL",
         'two_factor_secret' => "VARCHAR(255) NULL",
         'two_factor_enabled' => "BOOLEAN DEFAULT FALSE",
+        'verification_code' => "VARCHAR(6) NULL",
+        'verification_code_expires' => "DATETIME NULL",
         'created_at' => "DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6)",
         'updated_at' => "DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6)",
         'last_login' => "DATETIME(6) NULL"

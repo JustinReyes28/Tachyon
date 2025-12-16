@@ -56,8 +56,7 @@ $username_email = $form_data['username_email'] ?? '';
                 </div>
                 <?php if ($show_resend_link): ?>
                     <p style="text-align: center; margin-bottom: 1rem;">
-                        <a href="resend_verification.php" style="color: #667eea; font-weight: 500;">Resend verification
-                            email</a>
+                        <a href="verify_code.php" style="color: #667eea; font-weight: 500;">Enter verification code</a>
                     </p>
                 <?php endif; ?>
             <?php endif; ?>

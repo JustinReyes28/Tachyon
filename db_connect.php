@@ -7,15 +7,49 @@ ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
 try {
-    if (!file_exists($envFile)) {
-        throw new Exception('Configuration file not found. Please contact the administrator.');
+// Custom function to load environment variables safely
+    function loadEnv($path) {
+        if (!file_exists($path)) {
+            throw new Exception('Configuration file not found. Please contact the administrator.');
+        }
+
+        // Try using native parse_ini_file first
+        $env = @parse_ini_file($path);
+
+        // Fallback to manual parsing if native function fails or returns empty
+        if (!$env) {
+            $env = [];
+            $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            foreach ($lines as $line) {
+                $line = trim($line);
+                
+                // Skip comments and empty lines
+                if (empty($line) || strpos($line, '#') === 0 || strpos($line, ';') === 0) {
+                    continue;
+                }
+
+                // Parse key=value
+                $parts = explode('=', $line, 2);
+                if (count($parts) === 2) {
+                    $key = trim($parts[0]);
+                    $value = trim($parts[1]);
+                    
+                    // Remove quotes if present (both single and double)
+                    $value = trim($value, '"\'');
+                    
+                    $env[$key] = $value;
+                }
+            }
+        }
+        
+        return $env;
     }
 
-    $env = parse_ini_file($envFile);
+    $env = loadEnv($envFile);
 
-    // Check if the .env file was loaded successfully
-    if ($env === false) {
-        throw new Exception('Configuration file is unreadable. Please contact the administrator.');
+    // Check if we managed to load any configuration
+    if (empty($env)) {
+        throw new Exception('Configuration file is unreadable or empty. Please contact the administrator.');
     }
 
     // Validate required environment variables

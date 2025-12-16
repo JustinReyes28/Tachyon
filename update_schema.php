@@ -64,32 +64,28 @@ if ($result === false) {
     }
 }
 
-// Add 'password_hash' column to users if it doesn't exist (rename scenario - we actually need to rename the password column)
-// Since we already fixed the code to use 'password', we should ensure that column exists
-$result = $conn->query("SHOW COLUMNS FROM users LIKE 'password'");
+// Add 'password_hash' column to users if it doesn't exist
+$result = $conn->query("SHOW COLUMNS FROM users LIKE 'password_hash'");
 if ($result === false) {
-    echo "Error checking for 'password' column: " . $conn->error . "\n";
+    echo "Error checking for 'password_hash' column: " . $conn->error . "\n";
 } elseif ($result->num_rows == 0) {
-    // Try checking for 'password_hash'
-    $result = $conn->query("SHOW COLUMNS FROM users LIKE 'password_hash'");
-    if ($result === false) {
-        echo "Error checking for 'password_hash' column: " . $conn->error . "\n";
-    } elseif ($result->num_rows == 0) {
-        $sql = "ALTER TABLE users ADD COLUMN password VARCHAR(255) NOT NULL";
+    // Check if 'password' exists (legacy)
+    $resultOld = $conn->query("SHOW COLUMNS FROM users LIKE 'password'");
+    if ($resultOld && $resultOld->num_rows > 0) {
+        $sql = "ALTER TABLE users CHANGE COLUMN password password_hash VARCHAR(255) NOT NULL";
         if ($conn->query($sql) === TRUE) {
-            echo "Added 'password' column to users table.\n";
-            $updates_applied[] = "Added 'password'";
+            echo "Renamed 'password' to 'password_hash' in users table.\n";
+            $updates_applied[] = "Renamed 'password' to 'password_hash'";
         } else {
-            echo "Error adding 'password' column: " . $conn->error . "\n";
+            echo "Error renaming 'password' to 'password_hash': " . $conn->error . "\n";
         }
     } else {
-        // If 'password_hash' exists, rename it to 'password'
-        $sql = "ALTER TABLE users CHANGE COLUMN password_hash password VARCHAR(255) NOT NULL";
+        $sql = "ALTER TABLE users ADD COLUMN password_hash VARCHAR(255) NOT NULL";
         if ($conn->query($sql) === TRUE) {
-            echo "Renamed 'password_hash' to 'password' in users table.\n";
-            $updates_applied[] = "Renamed 'password_hash' to 'password'";
+            echo "Added 'password_hash' column to users table.\n";
+            $updates_applied[] = "Added 'password_hash'";
         } else {
-            echo "Error renaming 'password_hash' to 'password': " . $conn->error . "\n";
+            echo "Error adding 'password_hash' column: " . $conn->error . "\n";
         }
     }
 }
