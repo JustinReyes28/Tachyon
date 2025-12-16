@@ -5,100 +5,107 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Due Date Reminder</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffffff;
+            background-image: radial-gradient(#dddddd 1px, transparent 1px);
+            background-size: 10px 10px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #ffffff;
+            border: 2px dotted #333333;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .header {
+            background-color: #333333;
+            color: #ffffff;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 16px;
+        }
+        .content {
+            padding: 30px;
+            color: #333333;
+        }
+        .content p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin: 0 0 20px 0;
+        }
+        .task-card {
+            background-color: #f8f8f8;
+            border: 1px dotted #333333;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .task-card p {
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        .task-card strong {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .button {
+            display: inline-block;
+            background-color: #333333;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            border: 1px dotted #333333;
+            margin-top: 10px;
+        }
+        .footer {
+            background-color: #f8f8f8;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px dotted #333333;
+            font-size: 12px;
+            color: #666666;
+        }
+    </style>
 </head>
 
-<body
-    style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f7;">
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
-        style="background-color: #f4f4f7; padding: 40px 20px;">
-        <tr>
-            <td align="center">
-                <table role="presentation" width="600" cellspacing="0" cellpadding="0"
-                    style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); overflow: hidden;">
-                    <!-- Header -->
-                    <tr>
-                        <td
-                            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">
-                            <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 600;">⏰ Task Reminder
-                            </h1>
-                            <p style="color: rgba(255, 255, 255, 0.9); margin: 10px 0 0 0; font-size: 16px;">Don't
-                                forget about your upcoming task!</p>
-                        </td>
-                    </tr>
-
-                    <!-- Body -->
-                    <tr>
-                        <td style="padding: 40px 30px;">
-                            <p style="color: #333333; font-size: 18px; margin: 0 0 20px 0;">
-                                Hi <strong>{{username}}</strong>,
-                            </p>
-
-                            <p style="color: #555555; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
-                                This is a friendly reminder that you have a task due soon. Make sure to complete it on
-                                time!
-                            </p>
-
-                            <!-- Task Card -->
-                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
-                                style="background-color: #f8f9fc; border-radius: 8px; border-left: 4px solid #667eea; margin-bottom: 30px;">
-                                <tr>
-                                    <td style="padding: 25px;">
-                                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-                                            <tr>
-                                                <td>
-                                                    <p
-                                                        style="color: #888888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px 0;">
-                                                        Task</p>
-                                                    <p
-                                                        style="color: #333333; font-size: 18px; font-weight: 600; margin: 0 0 20px 0;">
-                                                        {{task_name}}</p>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <p
-                                                        style="color: #888888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px 0;">
-                                                        Due Date</p>
-                                                    <p
-                                                        style="color: #e74c3c; font-size: 18px; font-weight: 600; margin: 0;">
-                                                        📅 {{due_date}}</p>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </table>
-
-                            <!-- CTA Button -->
-                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-                                <tr>
-                                    <td align="center">
-                                        <a href="{{app_url}}/dashboard.php"
-                                            style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; padding: 15px 40px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
-                                            View My Tasks
-                                        </a>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-
-                    <!-- Footer -->
-                    <tr>
-                        <td
-                            style="background-color: #f8f9fc; padding: 25px 30px; text-align: center; border-top: 1px solid #eaeaea;">
-                            <p style="color: #888888; font-size: 14px; margin: 0 0 10px 0;">
-                                You're receiving this email because you have tasks in Tachyon.
-                            </p>
-                            <p style="color: #aaaaaa; font-size: 12px; margin: 0;">
-                                © 2024 Tachyon Task Manager. All rights reserved.
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⏰ Task Reminder</h1>
+            <p>Don't forget about your upcoming task!</p>
+        </div>
+        <div class="content">
+            <p>Hi <strong>{{username}}</strong>,</p>
+            <p>This is a friendly reminder that you have a task due soon. Make sure to complete it on time!</p>
+            <div class="task-card">
+                <p><strong>Task:</strong> {{task_name}}</p>
+                <p><strong>Due Date:</strong> 📅 {{due_date}}</p>
+            </div>
+            <p style="text-align: center;">
+                <a href="{{app_url}}/dashboard.php" class="button">View My Tasks</a>
+            </p>
+        </div>
+        <div class="footer">
+            <p>You're receiving this email because you have tasks in Tachyon.</p>
+            <p>© 2024 Tachyon Task Manager. All rights reserved.</p>
+        </div>
+    </div>
 </body>
 
 </html>
