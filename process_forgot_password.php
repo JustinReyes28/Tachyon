@@ -39,13 +39,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($updateStmt) {
                 $updateStmt->bind_param("si", $token, $userId);
                 if ($updateStmt->execute()) {
-                    // Send email using PHPMailer
-                    require_once 'mailer.php';
+                    // Send email using EmailNotifier
+                    require_once 'includes/EmailNotifier.php';
                     // Detect scheme
                     $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
                     $resetLink = $scheme . "://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/reset_password.php?token=" . urlencode($token);
 
-                    if (sendResetEmail($email, $resetLink)) {
+                    $emailNotifier = new EmailNotifier();
+
+                    if ($emailNotifier->sendPasswordResetEmail($email, $resetLink)) {
                         $_SESSION['success_message'] = "If an account exists with that email, a password reset link has been sent.";
                     } else {
                         // Fallback logging if email fails (for debugging)
