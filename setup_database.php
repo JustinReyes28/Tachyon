@@ -62,6 +62,12 @@ $sql_users = "CREATE TABLE IF NOT EXISTS users (
     verification_token VARCHAR(255) NULL,
     reset_token VARCHAR(255) NULL,
     reset_token_expires DATETIME(6) NULL,
+    password_reset_token VARCHAR(255) NULL,
+    password_reset_token_expires DATETIME(6) NULL,
+    password_change_token VARCHAR(255) NULL,
+    password_change_token_expires DATETIME(6) NULL,
+    account_deletion_token VARCHAR(255) NULL,
+    account_deletion_token_expires DATETIME(6) NULL,
     two_factor_secret VARCHAR(255) NULL,
     two_factor_enabled BOOLEAN DEFAULT FALSE,
     created_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
@@ -106,10 +112,26 @@ if ($conn->query($sql_users) === TRUE) {
         'email_verified' => "BOOLEAN DEFAULT FALSE",
         'verification_token' => "VARCHAR(255) NULL",
         'reset_token' => "VARCHAR(255) NULL",
-        'reset_token_expires' => "DATETIME(6) NULL"
+        'reset_token_expires' => "DATETIME(6) NULL",
+        'password_reset_token' => "VARCHAR(255) NULL",
+        'password_reset_token_expires' => "DATETIME(6) NULL",
+        'password_change_token' => "VARCHAR(255) NULL",
+        'password_change_token_expires' => "DATETIME(6) NULL",
+        'account_deletion_token' => "VARCHAR(255) NULL",
+        'account_deletion_token_expires' => "DATETIME(6) NULL"
     ];
 
-    foreach ($columns_to_check as $col => $def) {
+    // Add new token columns for separate operations
+    $new_columns_to_check = [
+        'password_reset_token' => "VARCHAR(255) NULL",
+        'password_reset_token_expires' => "DATETIME(6) NULL",
+        'password_change_token' => "VARCHAR(255) NULL",
+        'password_change_token_expires' => "DATETIME(6) NULL",
+        'account_deletion_token' => "VARCHAR(255) NULL",
+        'account_deletion_token_expires' => "DATETIME(6) NULL"
+    ];
+
+    foreach ($new_columns_to_check as $col => $def) {
         $check = $conn->query("SHOW COLUMNS FROM users LIKE '$col'");
         if ($check->num_rows == 0) {
             $alter = "ALTER TABLE users ADD COLUMN $col $def";

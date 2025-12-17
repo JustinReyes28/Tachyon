@@ -51,8 +51,8 @@ $verification_code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 // Hash the verification code before storing
 $verification_code_hash = password_hash($verification_code, PASSWORD_DEFAULT);
 
-// Store hashed code in database (reusing reset_token fields)
-$stmt = $conn->prepare("UPDATE users SET reset_token = ?, reset_token_expires = DATE_ADD(NOW(), INTERVAL 10 MINUTE) WHERE id = ?");
+// Store hashed code in database (using account_deletion_token fields)
+$stmt = $conn->prepare("UPDATE users SET account_deletion_token = ?, account_deletion_token_expires = DATE_ADD(NOW(), INTERVAL 10 MINUTE) WHERE id = ?");
 $stmt->bind_param("si", $verification_code_hash, $user_id);
 $stmt->execute();
 $stmt->close();
