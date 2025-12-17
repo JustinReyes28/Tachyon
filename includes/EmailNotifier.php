@@ -311,6 +311,63 @@ class EmailNotifier
     }
 
     /**
+     * Send a delete account verification code email
+     *
+     * @param string $userEmail Recipient email address
+     * @param string $username Recipient's username
+     * @param string $code 6-digit verification code
+     * @return bool True on success, false on failure
+     */
+    public function sendDeleteAccountCode($userEmail, $username, $code)
+    {
+        try {
+            // Clear previous recipients
+            $this->mailer->clearAddresses();
+            $this->mailer->addAddress($userEmail, $username);
+
+            // Set subject
+            $this->mailer->Subject = "Account Deletion Verification - Tachyon";
+
+            // Load and process template
+            $templateFile = $this->templateDir . 'delete_account_code.html';
+
+            if (!file_exists($templateFile)) {
+                error_log("EmailNotifier: Template not found at $templateFile");
+                return false;
+            }
+
+            $template = file_get_contents($templateFile);
+
+            // Replace placeholders
+            $body = str_replace(
+                ['{{username}}', '{{verification_code}}'],
+                [htmlspecialchars($username, ENT_NOQUOTES), htmlspecialchars($code, ENT_NOQUOTES)],
+                $template
+            );
+
+            $this->mailer->Body = $body;
+
+            // Plain text alternative
+            $this->mailer->AltBody = "Hi " . htmlspecialchars($username, ENT_NOQUOTES) . ",\n\n" .
+                "You requested to delete your Tachyon account.\n\n" .
+                "Your verification code is: $code\n\n" .
+                "This code expires in 10 minutes.\n\n" .
+                "WARNING: This action is permanent and cannot be undone.\n\n" .
+                "If you didn't request this, please secure your account immediately.\n\n" .
+                "- Tachyon Task Manager";
+
+            // Send the email
+            $this->mailer->send();
+
+            return true;
+
+        } catch (Exception $e) {
+            error_log("EmailNotifier Error: Failed to send delete account code to $userEmail. Error: " . $this->mailer->ErrorInfo);
+            return false;
+        }
+    }
+
+    /**
      * Send a password reset email
      *
      * @param string $userEmail Recipient email address
