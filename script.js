@@ -225,8 +225,8 @@ document.addEventListener('DOMContentLoaded', () => {
         input.style.boxShadow = '';
     }
 
-    // Auto-dismiss alerts
-    const alerts = document.querySelectorAll('.alert');
+    // Auto-dismiss alerts (but exclude persistent alerts like import info)
+    const alerts = document.querySelectorAll('.alert:not(.persistent)');
     if (alerts.length > 0) {
         setTimeout(() => {
             alerts.forEach(alert => {

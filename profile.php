@@ -152,10 +152,10 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                     <input type="file" id="import-file-input" style="display: none;">
 
                     <div class="import-alerts">
-                        <div class="alert">
+                        <div class="alert persistent">
                             <strong>JSON Import:</strong> Restores full note formatting, fonts, and colors.
                         </div>
-                        <div class="alert">
+                        <div class="alert persistent">
                             <strong>CSV Import:</strong> Restores text only. Original fonts/styling are NOT preserved.
                         </div>
                     </div>
