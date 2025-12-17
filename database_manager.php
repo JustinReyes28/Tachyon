@@ -233,6 +233,9 @@ class DatabaseManager {
                 }
             }
         }
+
+        // Update schema functionality from update_schema.php
+        $this->updateLegacySchema($updates);
         
         // Apply token column migrations (if not already handled above)
         $this->migrateTokenColumns($updates);
@@ -298,6 +301,110 @@ class DatabaseManager {
             echo "Columns added: " . implode(', ', $migrations_applied) . "\n";
         } else {
             echo "No new columns were added (they may already exist).\n";
+        }
+    }
+
+    /**
+     * Update legacy schema - handles functionality from update_schema.php
+     */
+    public function updateLegacySchema(&$updates = null) {
+        echo "<h3>Updating Legacy Schema</h3>\n";
+
+        $legacy_updates_applied = [];
+
+        // Add 'description' column to todos if it doesn't exist
+        $result = $this->conn->query("SHOW COLUMNS FROM todos LIKE 'description'");
+        if ($result === false) {
+            echo "Error checking for 'description' column: " . $this->conn->error . "\n";
+        } elseif ($result->num_rows == 0) {
+            $sql = "ALTER TABLE todos ADD COLUMN description TEXT";
+            if ($this->conn->query($sql) === TRUE) {
+                echo "✓ Added 'description' column to todos table.\n";
+                $legacy_updates_applied[] = "Added 'description'";
+                if ($updates !== null) {
+                    $updates[] = "Added 'description'";
+                }
+            } else {
+                echo "✗ Error adding 'description' column: " . $this->conn->error . "\n";
+            }
+        }
+
+        // Add 'completed_at' column to todos if it doesn't exist
+        $result = $this->conn->query("SHOW COLUMNS FROM todos LIKE 'completed_at'");
+        if ($result === false) {
+            echo "Error checking for 'completed_at' column: " . $this->conn->error . "\n";
+        } elseif ($result->num_rows == 0) {
+            $sql = "ALTER TABLE todos ADD COLUMN completed_at DATETIME(6) NULL";
+            if ($this->conn->query($sql) === TRUE) {
+                echo "✓ Added 'completed_at' column to todos table.\n";
+                $legacy_updates_applied[] = "Added 'completed_at'";
+                if ($updates !== null) {
+                    $updates[] = "Added 'completed_at'";
+                }
+            } else {
+                echo "✗ Error adding 'completed_at' column: " . $this->conn->error . "\n";
+            }
+        }
+
+        // Add 'created_by' column to todos if it doesn't exist
+        $result = $this->conn->query("SHOW COLUMNS FROM todos LIKE 'created_by'");
+        if ($result === false) {
+            echo "Error checking for 'created_by' column: " . $this->conn->error . "\n";
+        } elseif ($result->num_rows == 0) {
+            $sql = "ALTER TABLE todos ADD COLUMN created_by INT";
+            if ($this->conn->query($sql) === TRUE) {
+                echo "✓ Added 'created_by' column to todos table.\n";
+                $legacy_updates_applied[] = "Added 'created_by'";
+                if ($updates !== null) {
+                    $updates[] = "Added 'created_by'";
+                }
+            } else {
+                echo "✗ Error adding 'created_by' column: " . $this->conn->error . "\n";
+            }
+        }
+
+        // Add 'updated_by' column to todos if it doesn't exist
+        $result = $this->conn->query("SHOW COLUMNS FROM todos LIKE 'updated_by'");
+        if ($result === false) {
+            echo "Error checking for 'updated_by' column: " . $this->conn->error . "\n";
+        } elseif ($result->num_rows == 0) {
+            $sql = "ALTER TABLE todos ADD COLUMN updated_by INT";
+            if ($this->conn->query($sql) === TRUE) {
+                echo "✓ Added 'updated_by' column to todos table.\n";
+                $legacy_updates_applied[] = "Added 'updated_by'";
+                if ($updates !== null) {
+                    $updates[] = "Added 'updated_by'";
+                }
+            } else {
+                echo "✗ Error adding 'updated_by' column: " . $this->conn->error . "\n";
+            }
+        }
+
+        // Update password columns to use DATETIME(6) format if they exist but with different format
+        $result = $this->conn->query("SHOW COLUMNS FROM users LIKE 'password_changed_at'");
+        if ($result && $result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            // Update to DATETIME(6) if not already
+            if (strpos($row['Type'], '(6)') === false) {
+                $sql = "ALTER TABLE users MODIFY COLUMN password_changed_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6)";
+                if ($this->conn->query($sql) === TRUE) {
+                    echo "✓ Updated 'password_changed_at' column format to DATETIME(6)\n";
+                    $legacy_updates_applied[] = "Updated 'password_changed_at' format";
+                    if ($updates !== null) {
+                        $updates[] = "Updated 'password_changed_at' format";
+                    }
+                }
+            }
+        }
+
+        echo "\nLegacy schema update completed!\n";
+        if (!empty($legacy_updates_applied)) {
+            echo "Updates applied:\n";
+            foreach ($legacy_updates_applied as $update) {
+                echo "- " . $update . "\n";
+            }
+        } else {
+            echo "No legacy updates were needed.\n";
         }
     }
     
