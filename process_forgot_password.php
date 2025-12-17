@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $token = bin2hex(random_bytes(32));
 
             // Use MySQL's NOW() + INTERVAL to ensure consistent timezone
-            $updateStmt = $conn->prepare("UPDATE users SET reset_token = ?, reset_token_expires = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE id = ?");
+            $updateStmt = $conn->prepare("UPDATE users SET password_reset_token = ?, password_reset_token_expires = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE id = ?");
             if ($updateStmt) {
                 $updateStmt->bind_param("si", $token, $userId);
                 if ($updateStmt->execute()) {

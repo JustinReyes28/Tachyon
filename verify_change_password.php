@@ -43,14 +43,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Verify code from database
-    $stmt = $conn->prepare("SELECT reset_token, reset_token_expires FROM users WHERE id = ? AND reset_token_expires > NOW()");
+    $stmt = $conn->prepare("SELECT password_change_token, password_change_token_expires FROM users WHERE id = ? AND password_change_token_expires > NOW()");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
     $stmt->close();
 
-    if (!$user || !password_verify($code, $user['reset_token'])) {
+    if (!$user || !password_verify($code, $user['password_change_token'])) {
         $_SESSION['errors'] = ["Invalid or expired verification code."];
         header("Location: verify_change_password.php");
         exit();
@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Update password
     $new_password_hash = $_SESSION['pending_password_hash'];
-    $stmt = $conn->prepare("UPDATE users SET password_hash = ?, password_changed_at = NOW(), reset_token = NULL, reset_token_expires = NULL WHERE id = ?");
+    $stmt = $conn->prepare("UPDATE users SET password_hash = ?, password_changed_at = NOW(), password_change_token = NULL, password_change_token_expires = NULL WHERE id = ?");
     $stmt->bind_param("si", $new_password_hash, $user_id);
     
     if ($stmt->execute()) {

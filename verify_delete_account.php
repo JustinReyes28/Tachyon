@@ -43,14 +43,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Verify code from database
-    $stmt = $conn->prepare("SELECT reset_token, reset_token_expires FROM users WHERE id = ? AND reset_token_expires > NOW()");
+    $stmt = $conn->prepare("SELECT account_deletion_token, account_deletion_token_expires FROM users WHERE id = ? AND account_deletion_token_expires > NOW()");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
     $stmt->close();
 
-    if (!$user || !password_verify($code, $user['reset_token'])) {
+    if (!$user || !password_verify($code, $user['account_deletion_token'])) {
         $_SESSION['errors'] = ["Invalid or expired verification code."];
         header("Location: verify_delete_account.php");
         exit();
