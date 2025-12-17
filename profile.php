@@ -104,8 +104,8 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
 
                 <div class="profile-actions" style="margin-top: 2.5rem;">
                     <h3 style="margin-bottom: 1rem;">Profile Actions</h3>
-                    <button class="btn btn-primary">Change Password</button>
-                    <button class="btn btn-danger">Delete Account</button>
+                    <a href="change_password.php" class="btn btn-primary">Change Password</a>
+                    <a href="delete_account.php" class="btn btn-danger">Delete Account</a>
                 </div>
             </div>
         </section>
