@@ -10,6 +10,7 @@ class DatabaseManager {
     
     public function __construct() {
         require_once 'db_connect.php';
+        global $conn;
         $this->conn = $conn;
     }
     
@@ -59,11 +60,16 @@ class DatabaseManager {
             priority ENUM('low', 'medium', 'high') DEFAULT 'medium',
             status ENUM('pending', 'in_progress', 'completed') DEFAULT 'pending',
             due_date DATE,
+            completed_at DATETIME(6) NULL,
+            created_by INT NULL,
+            updated_by INT NULL,
             is_trashed TINYINT(1) DEFAULT 0,
             trashed_at DATETIME DEFAULT NULL,
             created_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
             updated_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+            FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
         )";
 
         // SQL to create notes table
@@ -351,12 +357,28 @@ class DatabaseManager {
         if ($result === false) {
             echo "Error checking for 'created_by' column: " . $this->conn->error . "\n";
         } elseif ($result->num_rows == 0) {
-            $sql = "ALTER TABLE todos ADD COLUMN created_by INT";
+            $sql = "ALTER TABLE todos ADD COLUMN created_by INT NULL";
             if ($this->conn->query($sql) === TRUE) {
                 echo "✓ Added 'created_by' column to todos table.\n";
                 $legacy_updates_applied[] = "Added 'created_by'";
                 if ($updates !== null) {
                     $updates[] = "Added 'created_by'";
+                }
+
+                // Add foreign key constraint for created_by
+                $fk_check = $this->conn->query("SELECT COUNT(*) AS cnt FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'todos' AND COLUMN_NAME = 'created_by' AND REFERENCED_TABLE_NAME = 'users'");
+                if ($fk_check && $fk_check->fetch_assoc()['cnt'] == 0) {
+                    if ($this->conn->query("ALTER TABLE todos ADD CONSTRAINT fk_todos_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL") === TRUE) {
+                        echo "✓ Added foreign key constraint for 'created_by'\n";
+                        $legacy_updates_applied[] = "Added FK for 'created_by'";
+                        if ($updates !== null) {
+                            $updates[] = "Added FK for 'created_by'";
+                        }
+                    } else {
+                        echo "⚠ Could not add foreign key constraint for 'created_by': " . $this->conn->error . "\n";
+                    }
+                } else {
+                    echo "✓ Foreign key constraint for 'created_by' already exists\n";
                 }
             } else {
                 echo "✗ Error adding 'created_by' column: " . $this->conn->error . "\n";
@@ -368,12 +390,28 @@ class DatabaseManager {
         if ($result === false) {
             echo "Error checking for 'updated_by' column: " . $this->conn->error . "\n";
         } elseif ($result->num_rows == 0) {
-            $sql = "ALTER TABLE todos ADD COLUMN updated_by INT";
+            $sql = "ALTER TABLE todos ADD COLUMN updated_by INT NULL";
             if ($this->conn->query($sql) === TRUE) {
                 echo "✓ Added 'updated_by' column to todos table.\n";
                 $legacy_updates_applied[] = "Added 'updated_by'";
                 if ($updates !== null) {
                     $updates[] = "Added 'updated_by'";
+                }
+
+                // Add foreign key constraint for updated_by
+                $fk_check = $this->conn->query("SELECT COUNT(*) AS cnt FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'todos' AND COLUMN_NAME = 'updated_by' AND REFERENCED_TABLE_NAME = 'users'");
+                if ($fk_check && $fk_check->fetch_assoc()['cnt'] == 0) {
+                    if ($this->conn->query("ALTER TABLE todos ADD CONSTRAINT fk_todos_updated_by FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL") === TRUE) {
+                        echo "✓ Added foreign key constraint for 'updated_by'\n";
+                        $legacy_updates_applied[] = "Added FK for 'updated_by'";
+                        if ($updates !== null) {
+                            $updates[] = "Added FK for 'updated_by'";
+                        }
+                    } else {
+                        echo "⚠ Could not add foreign key constraint for 'updated_by': " . $this->conn->error . "\n";
+                    }
+                } else {
+                    echo "✓ Foreign key constraint for 'updated_by' already exists\n";
                 }
             } else {
                 echo "✗ Error adding 'updated_by' column: " . $this->conn->error . "\n";

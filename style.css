@@ -1002,6 +1002,7 @@ a:hover {
         padding: var(--space-md);
     }
 }
+
 /* ================== TRASH STYLES ================== */
 .trash-badge {
     background-color: var(--color-dim);
@@ -1019,3 +1020,122 @@ a:hover {
     color: var(--color-black);
 }
 
+
+/* ================== BACKUP SECTION ================== */
+.backup-section {
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-dim);
+}
+
+.backup-section h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    color: var(--color-white);
+}
+
+.backup-description {
+    color: var(--color-white);
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.backup-size-info {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    border: 1px dashed var(--color-dim);
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.size-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.size-row:last-child {
+    border-bottom: none;
+}
+
+.size-value {
+    color: var(--color-white);
+    font-weight: 500;
+}
+
+.backup-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--color-white);
+    border: 1px solid var(--color-white);
+    padding: 10px 20px;
+    font-family: var(--font-mono);
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-secondary:hover {
+    background-color: var(--color-white);
+    color: var(--color-black);
+}
+
+.btn-secondary:disabled,
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .backup-buttons {
+        flex-direction: column;
+    }
+
+    .backup-buttons .btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* ================== IMPORT SECTION ================== */
+.import-section {
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-dim);
+}
+
+.import-section h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    color: var(--color-white);
+}
+
+.import-alerts .alert {
+    background-color: transparent;
+    border: 1px solid var(--color-dim);
+    color: var(--color-white);
+    padding: var(--space-md);
+    font-size: 0.85rem;
+    margin-bottom: var(--space-sm);
+}
+
+.import-alerts .alert.persistent {
+    opacity: 1 !important;
+    transition: none !important;
+}
+
+.import-alerts .alert strong {
+    color: var(--color-white);
+}
