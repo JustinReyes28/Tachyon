@@ -10,6 +10,7 @@ class DatabaseManager {
     
     public function __construct() {
         require_once 'db_connect.php';
+        global $conn;
         $this->conn = $conn;
     }
     
