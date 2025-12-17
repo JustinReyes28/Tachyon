@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $result->fetch_assoc();
     $stmt->close();
 
-    if (!$user || $user['reset_token'] !== $code) {
+    if (!$user || !password_verify($code, $user['reset_token'])) {
         $_SESSION['errors'] = ["Invalid or expired verification code."];
         header("Location: verify_change_password.php");
         exit();
