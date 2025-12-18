@@ -228,7 +228,7 @@ unset($_SESSION['success_message']);
                             value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                         <input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>">
                         <input type="hidden" name="redirect_to_verify" value="1">
-                        <button type="submit" class="btn btn-secondary">
+                        <button type="submit" class="btn-secondary">
                             Resend Code
                         </button>
                     </form>

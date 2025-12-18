@@ -79,7 +79,7 @@ function processJsonImport($conn, $user_id, $file_path)
 
     // Import Todos
     if (isset($data['todos']) && is_array($data['todos'])) {
-        $stmt = $conn->prepare("INSERT INTO todos (user_id, task, description, status, priority, due_date) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO todos (user_id, created_by, task, description, status, priority, due_date) VALUES (?, ?, ?, ?, ?, ?, ?)");
         foreach ($data['todos'] as $todo) {
             $task = $todo['task'] ?? 'Untitled Task';
             $desc = $todo['description'] ?? '';
@@ -87,7 +87,7 @@ function processJsonImport($conn, $user_id, $file_path)
             $priority = $todo['priority'] ?? 'medium';
             $due = !empty($todo['due_date']) ? $todo['due_date'] : null;
 
-            $stmt->bind_param("isssss", $user_id, $task, $desc, $status, $priority, $due);
+            $stmt->bind_param("iisssss", $user_id, $user_id, $task, $desc, $status, $priority, $due);
             if ($stmt->execute()) {
                 $imported_todos++;
             }
@@ -130,7 +130,7 @@ function processTodosCsvImport($conn, $user_id, $file_path)
     // Basic validation of headers could be added here
 
     $imported = 0;
-    $stmt = $conn->prepare("INSERT INTO todos (user_id, task, description, status, priority, due_date) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO todos (user_id, created_by, task, description, status, priority, due_date) VALUES (?, ?, ?, ?, ?, ?, ?)");
 
     while (($row = fgetcsv($handle)) !== FALSE) {
         // Assume standard export format: id, task, description, status, priority, due_date, ...
@@ -146,7 +146,7 @@ function processTodosCsvImport($conn, $user_id, $file_path)
         $priority = $row[4] ?? 'medium';
         $due = !empty($row[5]) && $row[5] !== 'null' ? $row[5] : null;
 
-        $stmt->bind_param("isssss", $user_id, $task, $desc, $status, $priority, $due);
+        $stmt->bind_param("iisssss", $user_id, $user_id, $task, $desc, $status, $priority, $due);
         if ($stmt->execute()) {
             $imported++;
         }

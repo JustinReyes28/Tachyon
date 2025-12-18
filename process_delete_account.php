@@ -73,3 +73,4 @@ if ($emailNotifier->sendDeleteAccountCode($user['email'], $user['username'], $ve
 header("Location: verify_delete_account.php");
 exit();
 
+
