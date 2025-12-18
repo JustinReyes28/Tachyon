@@ -153,6 +153,7 @@ try {
         <header class="app-header">
             <h1 class="app-title">TACHYON</h1>
             <div class="user-nav">
+                <a href="index.php" class="btn btn-sm">Home</a>
                 <span class="user-welcome"><?php echo htmlspecialchars($username); ?></span>
                 <a href="logout.php" class="btn btn-sm">Logout</a>
             </div>
