@@ -472,7 +472,8 @@ class DatabaseManager {
      * Run individual operations based on parameters
      */
     public function runOperation($operation) {
-        echo "<h2>Tachyon Database Manager - Operation: $operation</h2>\n";
+        $sanitized_operation = htmlspecialchars($operation, ENT_QUOTES, 'UTF-8');
+        echo "<h2>Tachyon Database Manager - Operation: $sanitized_operation</h2>\n";
         echo "<pre style='background: #f5f5f5; padding: 20px; border-radius: 5px;'>\n";
 
         switch ($operation) {
