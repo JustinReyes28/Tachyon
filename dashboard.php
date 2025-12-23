@@ -164,6 +164,7 @@ try {
             <div class="nav-buttons">
                 <a href="todos.php" class="nav-btn">[ToDos]</a>
                 <a href="create_note.php" class="nav-btn">[Notes]</a>
+                <a href="recurring_reminders.php" class="nav-btn">[Recurring Reminders]</a>
                 <a href="profile.php" class="nav-btn">[Profile]</a>
                 <a href="trash.php" class="nav-btn">
                     [Trash]
