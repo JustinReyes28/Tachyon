@@ -47,7 +47,7 @@ if ($stmt) {
 // Calculate stats for recurring tasks
 $total_recurring = count($recurring_todos);
 $completed_recurring = count(array_filter($recurring_todos, function ($t) {
-    return $t['status'] === 'completed'; 
+    return $t['status'] === 'completed';
 }));
 $pending_recurring = $total_recurring - $completed_recurring;
 ?>
@@ -87,6 +87,44 @@ $pending_recurring = $total_recurring - $completed_recurring;
         <!-- Page Title -->
         <h2 style="margin-bottom: var(--space-xl); text-align: center;">[Recurring Reminders]</h2>
 
+        <!-- Add Recurring Reminder Form -->
+        <div class="add-task-card" style="margin-bottom: var(--space-xl);">
+            <h2>[+ NEW RECURRING REMINDER]</h2>
+            <form action="add_recurring.php" method="POST" class="mt-4">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+                <div class="task-form-row">
+                    <div class="form-group">
+                        <label for="task">Reminder</label>
+                        <input type="text" id="task" name="task" placeholder="What needs to be reminded?" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="priority">Priority</label>
+                        <select id="priority" name="priority">
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="due_date">Start Date</label>
+                        <input type="date" id="due_date" name="due_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="recurring">Frequency</label>
+                        <select id="recurring" name="recurring" required>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <button type="submit" class="btn btn-primary">[Add Reminder]</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
         <!-- Stats -->
         <div class="stats-grid">
             <div class="stat-card">
@@ -108,7 +146,7 @@ $pending_recurring = $total_recurring - $completed_recurring;
             <?php if (empty($recurring_todos)): ?>
                 <div class="empty-state">
                     <h3>No recurring reminders yet!</h3>
-                    <p>Create a recurring task in [ToDos] to see it here.</p>
+                    <p>Create a recurring task to see it here.</p>
                 </div>
             <?php else: ?>
                 <?php foreach ($recurring_todos as $todo): ?>
@@ -139,6 +177,7 @@ $pending_recurring = $total_recurring - $completed_recurring;
                                     <input type="hidden" name="csrf_token"
                                         value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                                     <input type="hidden" name="todo_id" value="<?php echo (int) $todo['id']; ?>">
+                                    <input type="hidden" name="return_url" value="recurring_reminders.php">
                                     <button type="submit" class="btn btn-success btn-sm">[Complete]</button>
                                 </form>
                             <?php endif; ?>
@@ -146,6 +185,7 @@ $pending_recurring = $total_recurring - $completed_recurring;
                                 <input type="hidden" name="csrf_token"
                                     value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                                 <input type="hidden" name="todo_id" value="<?php echo (int) $todo['id']; ?>">
+                                <input type="hidden" name="return_url" value="recurring_reminders.php">
                                 <button type="submit" class="btn btn-danger btn-sm">[Delete]</button>
                             </form>
                         </div>

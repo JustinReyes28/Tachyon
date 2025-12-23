@@ -60,6 +60,7 @@ class DatabaseManager {
             priority ENUM('low', 'medium', 'high') DEFAULT 'medium',
             status ENUM('pending', 'in_progress', 'completed') DEFAULT 'pending',
             due_date DATE,
+            recurring ENUM('none', 'daily', 'weekly', 'monthly', 'yearly') DEFAULT 'none',
             completed_at DATETIME(6) NULL,
             created_by INT NULL,
             updated_by INT NULL,
@@ -432,6 +433,23 @@ class DatabaseManager {
                         $updates[] = "Updated 'password_changed_at' format";
                     }
                 }
+            }
+        }
+
+        // Add 'recurring' column to todos table if it doesn't exist
+        $result = $this->conn->query("SHOW COLUMNS FROM todos LIKE 'recurring'");
+        if ($result === false) {
+            echo "Error checking for 'recurring' column: " . $this->conn->error . "\n";
+        } elseif ($result->num_rows == 0) {
+            $sql = "ALTER TABLE todos ADD COLUMN recurring ENUM('none', 'daily', 'weekly', 'monthly', 'yearly') DEFAULT 'none';";
+            if ($this->conn->query($sql) === TRUE) {
+                echo "✓ Added 'recurring' column to todos table.\n";
+                $legacy_updates_applied[] = "Added 'recurring' column";
+                if ($updates !== null) {
+                    $updates[] = "Added 'recurring' column";
+                }
+            } else {
+                echo "✗ Error adding 'recurring' column: " . $this->conn->error . "\n";
             }
         }
 

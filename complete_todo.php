@@ -82,6 +82,13 @@ if ($stmt) {
     $_SESSION['error_message'] = 'An internal error occurred. Please try again.';
 }
 
-header('Location: dashboard.php');
+$return_url = $_POST['return_url'] ?? 'dashboard.php';
+// Basic whitelist for return_url to prevent open redirect
+$allowed_redirects = ['dashboard.php', 'todos.php', 'recurring_reminders.php'];
+if (!in_array($return_url, $allowed_redirects)) {
+    $return_url = 'dashboard.php';
+}
+
+header("Location: $return_url");
 exit();
 ?>

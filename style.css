@@ -544,6 +544,11 @@ select {
     opacity: 0.5;
 }
 
+.badge-recurring {
+    color: var(--color-white);
+    opacity: 0.9;
+}
+
 .badge.completed {
     opacity: 0.5;
 }

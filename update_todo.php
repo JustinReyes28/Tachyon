@@ -147,6 +147,13 @@ if ($update_stmt->execute()) {
 
 $update_stmt->close();
 
-header('Location: dashboard.php');
+$return_url = $_POST['return_url'] ?? 'dashboard.php';
+// Basic whitelist for return_url to prevent open redirect
+$allowed_redirects = ['dashboard.php', 'todos.php', 'recurring_reminders.php', 'trash.php'];
+if (!in_array($return_url, $allowed_redirects)) {
+    $return_url = 'dashboard.php';
+}
+
+header("Location: $return_url");
 exit();
 ?>

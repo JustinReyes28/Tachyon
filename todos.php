@@ -25,7 +25,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
 
 // Fetch user's todos
 $todos = [];
-$stmt = $conn->prepare("SELECT id, task, description, status, priority, due_date, created_at FROM todos WHERE user_id = ? AND is_trashed = 0 ORDER BY
+$stmt = $conn->prepare("SELECT id, task, description, status, priority, due_date, recurring, created_at FROM todos WHERE user_id = ? AND is_trashed = 0 AND (recurring = 'none' OR recurring IS NULL) ORDER BY
     CASE priority
         WHEN 'high' THEN 1
         WHEN 'medium' THEN 2
@@ -47,7 +47,8 @@ if ($stmt) {
 // Calculate stats
 $total = count($todos);
 $completed = count(array_filter($todos, function ($t) {
-    return $t['status'] === 'completed'; }));
+    return $t['status'] === 'completed';
+}));
 $pending = $total - $completed;
 ?>
 <!DOCTYPE html>
@@ -131,6 +132,7 @@ $pending = $total - $completed;
                         <input type="date" id="due_date" name="due_date">
                     </div>
                     <div class="form-group" style="margin-bottom: 0;">
+                        <input type="hidden" name="recurring" value="none">
                         <button type="submit" class="btn btn-primary">[Add Task]</button>
                     </div>
                 </div>
@@ -170,6 +172,7 @@ $pending = $total - $completed;
                                     <input type="hidden" name="csrf_token"
                                         value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                                     <input type="hidden" name="todo_id" value="<?php echo (int) $todo['id']; ?>">
+                                    <input type="hidden" name="return_url" value="todos.php">
                                     <button type="submit" class="btn btn-success btn-sm">[Complete]</button>
                                 </form>
                             <?php endif; ?>
@@ -177,6 +180,7 @@ $pending = $total - $completed;
                                 <input type="hidden" name="csrf_token"
                                     value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                                 <input type="hidden" name="todo_id" value="<?php echo (int) $todo['id']; ?>">
+                                <input type="hidden" name="return_url" value="todos.php">
                                 <button type="submit" class="btn btn-danger btn-sm">[Delete]</button>
                             </form>
                         </div>
