@@ -3,6 +3,7 @@
 session_start();
 require_once 'db_connect.php';
 require_once 'includes/functions.php';
+$page_description = "Create, edit, and organize your rich-text notes with Tachyon's intuitive note-taking interface.";
 
 // Session protection - redirect if not authenticated
 if (!isset($_SESSION['user_id'])) {

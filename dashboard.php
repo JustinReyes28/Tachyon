@@ -3,6 +3,7 @@
 session_start();
 require_once 'db_connect.php';
 require_once 'includes/functions.php';
+$page_description = "Access your Tachyon dashboard to view your latest notes and pending tasks at a glance.";
 
 // Session protection - redirect if not authenticated
 if (!isset($_SESSION['user_id'])) {

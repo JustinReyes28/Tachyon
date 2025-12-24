@@ -3,6 +3,7 @@
 session_start();
 require_once 'db_connect.php';
 require_once 'includes/functions.php';
+$page_description = "Manage your tasks and reminders efficiently with Tachyon's streamlined todo list manager.";
 
 // Session protection - redirect if not authenticated
 if (!isset($_SESSION['user_id'])) {

@@ -2,6 +2,7 @@
 // index.php - Public landing dashboard (no login required)
 session_start();
 require_once 'includes/functions.php';
+$page_description = "Capture todos and notes instantly with Tachyon. A fast, minimal productivity tool with local storage and optional cloud sync.";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -108,7 +109,8 @@ require_once 'includes/functions.php';
         <section class="notes-section" id="notes-section" style="margin-top: var(--space-2xl);">
             <h2 class="section-title">Guest Notes</h2>
             <p class="mb-4" style="max-width: 520px;">
-                Quick notes for this device only. For rich notes, backups, and email features, use your account dashboard.
+                Quick notes for this device only. For rich notes, backups, and email features, use your account
+                dashboard.
             </p>
 
             <div class="add-task-card">
