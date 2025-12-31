@@ -136,6 +136,13 @@ if ($search !== null && strlen($search) > 200) {
 $sql = "SELECT id, task, description, status, priority, due_date, created_at, updated_at
         FROM todos
         WHERE user_id = ? AND is_trashed = 0";
+
+$recurring_filter = isset($_GET['recurring']) ? $_GET['recurring'] : null;
+if ($recurring_filter === 'none') {
+    $sql .= " AND (recurring = 'none' OR recurring IS NULL)";
+} elseif ($recurring_filter === 'only') {
+    $sql .= " AND recurring != 'none' AND recurring IS NOT NULL";
+}
 $params = [$user_id];
 $types = "i";
 

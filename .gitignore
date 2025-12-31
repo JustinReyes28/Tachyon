@@ -45,6 +45,7 @@ public/storage/
 # Database credentials (sensitive)
 .env
 .env.*
+database_manager.php
 
 # Debug files
 inspect_todos.php

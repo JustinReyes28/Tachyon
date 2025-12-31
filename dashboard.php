@@ -3,6 +3,7 @@
 session_start();
 require_once 'db_connect.php';
 require_once 'includes/functions.php';
+$page_description = "Access your Tachyon dashboard to view your latest notes and pending tasks at a glance.";
 
 // Session protection - redirect if not authenticated
 if (!isset($_SESSION['user_id'])) {
@@ -164,6 +165,7 @@ try {
             <div class="nav-buttons">
                 <a href="todos.php" class="nav-btn">[ToDos]</a>
                 <a href="create_note.php" class="nav-btn">[Notes]</a>
+                <a href="recurring_reminders.php" class="nav-btn">[Reminders]</a>
                 <a href="profile.php" class="nav-btn">[Profile]</a>
                 <a href="trash.php" class="nav-btn">
                     [Trash]

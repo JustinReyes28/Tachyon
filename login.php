@@ -2,6 +2,7 @@
 // login.php
 session_start();
 require_once 'includes/functions.php';
+$page_description = "Log in to your Tachyon account to access your synced todos and notes from any device.";
 
 // CSRF token generation
 if (!isset($_SESSION['csrf_token'])) {

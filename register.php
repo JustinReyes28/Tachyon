@@ -2,6 +2,7 @@
 // register.php
 session_start();
 require_once 'includes/functions.php';
+$page_description = "Create a Tachyon account to sync your todos and notes across devices and unlock advanced features.";
 
 // CSRF token generation
 if (!isset($_SESSION['csrf_token'])) {

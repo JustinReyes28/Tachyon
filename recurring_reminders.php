@@ -1,9 +1,8 @@
 <?php
-// todos.php - ToDos management page (protected page)
+// recurring_reminders.php - Display recurring reminders (protected page)
 session_start();
 require_once 'db_connect.php';
 require_once 'includes/functions.php';
-$page_description = "Manage your tasks and reminders efficiently with Tachyon's streamlined todo list manager.";
 
 // Session protection - redirect if not authenticated
 if (!isset($_SESSION['user_id'])) {
@@ -24,9 +23,9 @@ $success_message = $_SESSION['success_message'] ?? '';
 $error_message = $_SESSION['error_message'] ?? '';
 unset($_SESSION['success_message'], $_SESSION['error_message']);
 
-// Fetch user's todos
-$todos = [];
-$stmt = $conn->prepare("SELECT id, task, description, status, priority, due_date, recurring, created_at FROM todos WHERE user_id = ? AND is_trashed = 0 AND (recurring = 'none' OR recurring IS NULL) ORDER BY
+// Fetch user's recurring todos
+$recurring_todos = [];
+$stmt = $conn->prepare("SELECT id, task, description, status, priority, due_date, created_at, recurring FROM todos WHERE user_id = ? AND is_trashed = 0 AND recurring != 'none' ORDER BY
     CASE priority
         WHEN 'high' THEN 1
         WHEN 'medium' THEN 2
@@ -39,24 +38,24 @@ if ($stmt) {
     if ($stmt->execute()) {
         $result = $stmt->get_result();
         while ($row = $result->fetch_assoc()) {
-            $todos[] = $row;
+            $recurring_todos[] = $row;
         }
     }
     $stmt->close();
 }
 
-// Calculate stats
-$total = count($todos);
-$completed = count(array_filter($todos, function ($t) {
+// Calculate stats for recurring tasks
+$total_recurring = count($recurring_todos);
+$completed_recurring = count(array_filter($recurring_todos, function ($t) {
     return $t['status'] === 'completed';
 }));
-$pending = $total - $completed;
+$pending_recurring = $total_recurring - $completed_recurring;
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <title>ToDos - Tachyon</title>
+    <title>Recurring Reminders - Tachyon</title>
     <?php include 'includes/head.php'; ?>
 </head>
 
@@ -71,19 +70,10 @@ $pending = $total - $completed;
             <div class="user-nav">
                 <span class="user-welcome"><?php echo htmlspecialchars($username); ?></span>
                 <a href="dashboard.php" class="btn btn-sm">Dashboard</a>
-                <a href="trash.php" class="btn btn-sm">
-                    Trash
-                    <?php
-                    $trash_count = get_trash_count($conn, $user_id);
-                    if ($trash_count > 0)
-                        echo "($trash_count)";
-                    ?>
-                </a>
+                <a href="todos.php" class="btn btn-sm">[ToDos]</a>
                 <a href="logout.php" class="btn btn-sm">Logout</a>
             </div>
         </header>
-
-
 
         <!-- Messages -->
         <?php if ($success_message): ?>
@@ -94,31 +84,18 @@ $pending = $total - $completed;
             <div class="alert alert-error"><?php echo htmlspecialchars($error_message); ?></div>
         <?php endif; ?>
 
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-value"><?php echo $total; ?></div>
-                <div class="stat-label">Total Tasks</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value"><?php echo $pending; ?></div>
-                <div class="stat-label">Pending</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value"><?php echo $completed; ?></div>
-                <div class="stat-label">Completed</div>
-            </div>
-        </div>
+        <!-- Page Title -->
+        <h2 style="margin-bottom: var(--space-xl); text-align: center;">[Recurring Reminders]</h2>
 
-        <!-- Add Todo Form -->
-        <div class="add-task-card">
-            <h2>[+ NEW TASK]</h2>
-            <form action="add_todo.php" method="POST" class="mt-4">
+        <!-- Add Recurring Reminder Form -->
+        <div class="add-task-card" style="margin-bottom: var(--space-xl);">
+            <h2>[+ NEW RECURRING REMINDER]</h2>
+            <form action="add_recurring.php" method="POST" class="mt-4">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                 <div class="task-form-row">
                     <div class="form-group">
-                        <label for="task">Task</label>
-                        <input type="text" id="task" name="task" placeholder="What needs to be done?" required>
+                        <label for="task">Reminder</label>
+                        <input type="text" id="task" name="task" placeholder="What needs to be reminded?" required>
                     </div>
                     <div class="form-group">
                         <label for="priority">Priority</label>
@@ -129,26 +106,50 @@ $pending = $total - $completed;
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="due_date">Due Date</label>
+                        <label for="due_date">Start Date</label>
                         <input type="date" id="due_date" name="due_date">
                     </div>
+                    <div class="form-group">
+                        <label for="recurring">Frequency</label>
+                        <select id="recurring" name="recurring" required>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
                     <div class="form-group" style="margin-bottom: 0;">
-                        <input type="hidden" name="recurring" value="none">
-                        <button type="submit" class="btn btn-primary">[Add Task]</button>
+                        <button type="submit" class="btn btn-primary">[Add Reminder]</button>
                     </div>
                 </div>
             </form>
         </div>
 
-        <!-- Todo List -->
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $total_recurring; ?></div>
+                <div class="stat-label">Total Recurring</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $pending_recurring; ?></div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $completed_recurring; ?></div>
+                <div class="stat-label">Completed</div>
+            </div>
+        </div>
+
+        <!-- Recurring Todo List -->
         <div class="todo-list">
-            <?php if (empty($todos)): ?>
+            <?php if (empty($recurring_todos)): ?>
                 <div class="empty-state">
-                    <h3>No tasks yet!</h3>
-                    <p>Add your first task above to get started.</p>
+                    <h3>No recurring reminders yet!</h3>
+                    <p>Create a recurring task to see it here.</p>
                 </div>
             <?php else: ?>
-                <?php foreach ($todos as $todo): ?>
+                <?php foreach ($recurring_todos as $todo): ?>
                     <div
                         class="todo-item priority-<?php echo htmlspecialchars($todo['priority']); ?> <?php echo $todo['status'] === 'completed' ? 'completed' : ''; ?>">
                         <div class="todo-content">
@@ -159,6 +160,9 @@ $pending = $total - $completed;
                                 </span>
                                 <span class="badge badge-priority <?php echo htmlspecialchars($todo['priority']); ?>">
                                     <?php echo ucfirst(htmlspecialchars($todo['priority'])); ?> Priority
+                                </span>
+                                <span class="badge badge-recurring">
+                                    <?php echo ucfirst(htmlspecialchars($todo['recurring'])); ?> Recurring
                                 </span>
                                 <?php if ($todo['due_date']): ?>
                                     <span class="badge badge-due">
@@ -173,7 +177,7 @@ $pending = $total - $completed;
                                     <input type="hidden" name="csrf_token"
                                         value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                                     <input type="hidden" name="todo_id" value="<?php echo (int) $todo['id']; ?>">
-                                    <input type="hidden" name="return_url" value="todos.php">
+                                    <input type="hidden" name="return_url" value="recurring_reminders.php">
                                     <button type="submit" class="btn btn-success btn-sm">[Complete]</button>
                                 </form>
                             <?php endif; ?>
@@ -181,7 +185,7 @@ $pending = $total - $completed;
                                 <input type="hidden" name="csrf_token"
                                     value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                                 <input type="hidden" name="todo_id" value="<?php echo (int) $todo['id']; ?>">
-                                <input type="hidden" name="return_url" value="todos.php">
+                                <input type="hidden" name="return_url" value="recurring_reminders.php">
                                 <button type="submit" class="btn btn-danger btn-sm">[Delete]</button>
                             </form>
                         </div>

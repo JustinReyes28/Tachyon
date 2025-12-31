@@ -58,6 +58,14 @@ try {
     $task = trim($_POST['task'] ?? '');
     $priority = $_POST['priority'] ?? 'medium';
     $due_date = $_POST['due_date'] ?? null;
+    $recurring = $_POST['recurring'] ?? 'none';
+
+    // Ensure this is a non-recurring task
+    if ($recurring !== 'none') {
+        $_SESSION['error_message'] = 'Recurring tasks must be added via Reminders.';
+        header('Location: recurring_reminders.php');
+        exit();
+    }
 
     debug_log("Inputs received - Task: " . substr($task, 0, 20) . "...");
 
@@ -92,9 +100,9 @@ try {
 
     // Insert todo into database
     if ($final_due_date !== null) {
-        $sql = "INSERT INTO todos (user_id, task, description, status, priority, due_date, created_by) VALUES (?, ?, ?, 'pending', ?, ?, ?)";
+        $sql = "INSERT INTO todos (user_id, task, description, status, priority, due_date, recurring, created_by) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?)";
     } else {
-        $sql = "INSERT INTO todos (user_id, task, description, status, priority, due_date, created_by) VALUES (?, ?, ?, 'pending', ?, NULL, ?)";
+        $sql = "INSERT INTO todos (user_id, task, description, status, priority, due_date, recurring, created_by) VALUES (?, ?, ?, 'pending', ?, NULL, ?, ?)";
     }
 
     debug_log("Preparing statement");
@@ -106,9 +114,9 @@ try {
 
         debug_log("Binding parameters");
         if ($final_due_date !== null) {
-            $stmt->bind_param("issssi", $user_id, $task, $description, $priority, $final_due_date, $user_id);
+            $stmt->bind_param("isssssi", $user_id, $task, $description, $priority, $final_due_date, $recurring, $user_id);
         } else {
-            $stmt->bind_param("isssi", $user_id, $task, $description, $priority, $user_id);
+            $stmt->bind_param("issssi", $user_id, $task, $description, $priority, $recurring, $user_id);
         }
 
         debug_log("Executing statement");

@@ -2,6 +2,7 @@
 // index.php - Public landing dashboard (no login required)
 session_start();
 require_once 'includes/functions.php';
+$page_description = "Capture todos and notes instantly with Tachyon. A fast, minimal productivity tool with local storage and optional cloud sync.";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -28,6 +29,26 @@ require_once 'includes/functions.php';
         .note-action-btn:hover {
             background-color: var(--color-black);
             color: var(--color-white);
+        }
+
+        .info-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+            line-height: 1;
+            color: var(--color-gray-600);
+            transition: color var(--transition-fast);
+        }
+
+        .info-btn:hover {
+            color: var(--color-black);
+        }
+        
+        #guest-todos-info {
+            display: none;
         }
     </style>
 </head>
@@ -79,8 +100,11 @@ require_once 'includes/functions.php';
 
         <!-- Todos Section -->
         <section class="notes-section" id="todos-section" style="margin-top: var(--space-2xl);">
-            <h2 class="section-title">Guest ToDos</h2>
-            <p class="mb-4" style="max-width: 520px;">
+            <div style="display: flex; align-items: center; gap: var(--space-sm);">
+                <h2 class="section-title" style="margin: 0;">Guest ToDos</h2>
+                <button id="info-toggle" class="info-btn" title="Toggle information">ℹ️</button>
+            </div>
+            <p class="mb-4" id="guest-todos-info" style="max-width: 520px;">
                 These tasks are stored only in this browser. Clear your browser data and they’re gone.
             </p>
 
@@ -106,9 +130,13 @@ require_once 'includes/functions.php';
 
         <!-- Notes Section -->
         <section class="notes-section" id="notes-section" style="margin-top: var(--space-2xl);">
-            <h2 class="section-title">Guest Notes</h2>
-            <p class="mb-4" style="max-width: 520px;">
-                Quick notes for this device only. For rich notes, backups, and email features, use your account dashboard.
+            <div style="display: flex; align-items: center; gap: var(--space-sm);">
+                <h2 class="section-title" style="margin: 0;">Guest Notes</h2>
+                <button id="notes-info-toggle" class="info-btn" title="Toggle information">ℹ️</button>
+            </div>
+            <p class="mb-4" id="guest-notes-info" style="max-width: 520px; display: none;">
+                Quick notes for this device only. For rich notes, backups, and email features, use your account
+                dashboard.
             </p>
 
             <div class="add-task-card">
@@ -341,6 +369,68 @@ require_once 'includes/functions.php';
                 saveToStorage(NOTES_STORAGE_KEY, notes);
                 renderNotes(notes);
             });
+
+            // Info toggle button for Todos
+            const infoToggle = document.getElementById('info-toggle');
+            const guestTodosInfo = document.getElementById('guest-todos-info');
+            
+            if (infoToggle && guestTodosInfo) {
+                // Default to hidden, but check localStorage for user preference
+                const infoHidden = localStorage.getItem('guestTodosInfoHidden') !== 'false';
+                
+                if (infoHidden) {
+                    guestTodosInfo.style.display = 'none';
+                    infoToggle.textContent = 'ℹ️';
+                    infoToggle.title = 'Show information';
+                }
+                
+                infoToggle.addEventListener('click', () => {
+                    const isHidden = guestTodosInfo.style.display === 'none';
+                    
+                    if (isHidden) {
+                        guestTodosInfo.style.display = 'block';
+                        infoToggle.textContent = 'ℹ️';
+                        infoToggle.title = 'Hide information';
+                        localStorage.setItem('guestTodosInfoHidden', 'false');
+                    } else {
+                        guestTodosInfo.style.display = 'none';
+                        infoToggle.textContent = 'ℹ️';
+                        infoToggle.title = 'Show information';
+                        localStorage.setItem('guestTodosInfoHidden', 'true');
+                    }
+                });
+            }
+            
+            // Info toggle button for Notes
+            const notesInfoToggle = document.getElementById('notes-info-toggle');
+            const guestNotesInfo = document.getElementById('guest-notes-info');
+            
+            if (notesInfoToggle && guestNotesInfo) {
+                // Default to hidden, but check localStorage for user preference
+                const infoHidden = localStorage.getItem('guestNotesInfoHidden') !== 'false';
+                
+                if (infoHidden) {
+                    guestNotesInfo.style.display = 'none';
+                    notesInfoToggle.textContent = 'ℹ️';
+                    notesInfoToggle.title = 'Show information';
+                }
+                
+                notesInfoToggle.addEventListener('click', () => {
+                    const isHidden = guestNotesInfo.style.display === 'none';
+                    
+                    if (isHidden) {
+                        guestNotesInfo.style.display = 'block';
+                        notesInfoToggle.textContent = 'ℹ️';
+                        notesInfoToggle.title = 'Hide information';
+                        localStorage.setItem('guestNotesInfoHidden', 'false');
+                    } else {
+                        guestNotesInfo.style.display = 'none';
+                        notesInfoToggle.textContent = 'ℹ️';
+                        notesInfoToggle.title = 'Show information';
+                        localStorage.setItem('guestNotesInfoHidden', 'true');
+                    }
+                });
+            }
         });
     </script>
 </body>
