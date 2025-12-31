@@ -30,6 +30,26 @@ $page_description = "Capture todos and notes instantly with Tachyon. A fast, min
             background-color: var(--color-black);
             color: var(--color-white);
         }
+
+        .info-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+            line-height: 1;
+            color: var(--color-gray-600);
+            transition: color var(--transition-fast);
+        }
+
+        .info-btn:hover {
+            color: var(--color-black);
+        }
+        
+        #guest-todos-info {
+            display: none;
+        }
     </style>
 </head>
 
@@ -80,8 +100,11 @@ $page_description = "Capture todos and notes instantly with Tachyon. A fast, min
 
         <!-- Todos Section -->
         <section class="notes-section" id="todos-section" style="margin-top: var(--space-2xl);">
-            <h2 class="section-title">Guest ToDos</h2>
-            <p class="mb-4" style="max-width: 520px;">
+            <div style="display: flex; align-items: center; gap: var(--space-sm);">
+                <h2 class="section-title" style="margin: 0;">Guest ToDos</h2>
+                <button id="info-toggle" class="info-btn" title="Toggle information">ℹ️</button>
+            </div>
+            <p class="mb-4" id="guest-todos-info" style="max-width: 520px;">
                 These tasks are stored only in this browser. Clear your browser data and they’re gone.
             </p>
 
@@ -343,6 +366,37 @@ $page_description = "Capture todos and notes instantly with Tachyon. A fast, min
                 saveToStorage(NOTES_STORAGE_KEY, notes);
                 renderNotes(notes);
             });
+
+            // Info toggle button
+            const infoToggle = document.getElementById('info-toggle');
+            const guestTodosInfo = document.getElementById('guest-todos-info');
+            
+            if (infoToggle && guestTodosInfo) {
+                // Default to hidden, but check localStorage for user preference
+                const infoHidden = localStorage.getItem('guestTodosInfoHidden') !== 'false';
+                
+                if (infoHidden) {
+                    guestTodosInfo.style.display = 'none';
+                    infoToggle.textContent = 'ℹ️';
+                    infoToggle.title = 'Show information';
+                }
+                
+                infoToggle.addEventListener('click', () => {
+                    const isHidden = guestTodosInfo.style.display === 'none';
+                    
+                    if (isHidden) {
+                        guestTodosInfo.style.display = 'block';
+                        infoToggle.textContent = 'ℹ️';
+                        infoToggle.title = 'Hide information';
+                        localStorage.setItem('guestTodosInfoHidden', 'false');
+                    } else {
+                        guestTodosInfo.style.display = 'none';
+                        infoToggle.textContent = 'ℹ️';
+                        infoToggle.title = 'Show information';
+                        localStorage.setItem('guestTodosInfoHidden', 'true');
+                    }
+                });
+            }
         });
     </script>
 </body>
