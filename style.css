@@ -714,6 +714,26 @@ a:hover {
         padding: var(--space-md) 0;
     }
 
+    .user-nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: var(--space-sm);
+    }
+
+    .user-nav .btn {
+        flex: 1;
+        min-width: 100px;
+        max-width: 150px;
+        font-size: 0.8rem;
+        padding: var(--space-sm) var(--space-md);
+    }
+
+    .app-title {
+        font-size: 1rem;
+        word-break: break-word;
+    }
+
     .stats-grid {
         grid-template-columns: 1fr;
     }
