@@ -7,8 +7,9 @@ ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
 try {
-// Custom function to load environment variables safely
-    function loadEnv($path) {
+    // Custom function to load environment variables safely
+    function loadEnv($path)
+    {
         if (!file_exists($path)) {
             throw new Exception('Configuration file not found. Please contact the administrator.');
         }
@@ -22,7 +23,7 @@ try {
             $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             foreach ($lines as $line) {
                 $line = trim($line);
-                
+
                 // Skip comments and empty lines
                 if (empty($line) || strpos($line, '#') === 0 || strpos($line, ';') === 0) {
                     continue;
@@ -33,15 +34,15 @@ try {
                 if (count($parts) === 2) {
                     $key = trim($parts[0]);
                     $value = trim($parts[1]);
-                    
+
                     // Remove quotes if present (both single and double)
                     $value = trim($value, '"\'');
-                    
+
                     $env[$key] = $value;
                 }
             }
         }
-        
+
         return $env;
     }
 
@@ -84,7 +85,7 @@ try {
     // Set character set to UTF-8 for proper encoding
     $conn->set_charset('utf8mb4');
 
-} catch (Exception $e) {
+} catch (Throwable $e) {
     // Log the actual error for debugging
     error_log("DB Connect Error: " . $e->getMessage());
 
