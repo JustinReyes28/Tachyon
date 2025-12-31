@@ -161,6 +161,7 @@ CREATE TABLE `todos` (
   `updated_by` int DEFAULT NULL,
   `is_trashed` tinyint(1) DEFAULT '0',
   `trashed_at` datetime DEFAULT NULL,
+  `recurring` enum('none','daily','weekly','monthly','yearly') COLLATE utf8mb4_unicode_ci DEFAULT 'none',
   `created_at` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
   `updated_at` datetime(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -11,6 +11,20 @@
 
 > A feature-rich ToDo and Notes application built with HTML, CSS, JavaScript, PHP, and MySQL database integration. Hosted on InfinityFree with custom authentication system.
 
+## 📸 Screenshots
+
+<div align="center">
+
+![Dashboard View](screenshots/img1.png "Dashboard View") | ![Notes View](screenshots/img2.png "Notes View") | ![Login View](screenshots/img3.png "Login View")
+---|---|---
+Dashboard | Notes | Login
+
+![Todo List](screenshots/img4.png "Todo List") | ![Rich Text Editor](screenshots/img5.png "Rich Text Editor") | ![Mobile View](screenshots/img6.png "Mobile View")
+---|---|---
+Todo List | Rich Text Editor | Mobile View
+
+</div>
+
 ## ✨ Features
 
 - **🔐 Secure Authentication**: Robust login and registration system with password hashing
