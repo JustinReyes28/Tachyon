@@ -60,3 +60,4 @@ phpmailer/
 mailer.php
 phpmailer/*.example
 
+.aider*
