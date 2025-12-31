@@ -11,21 +11,21 @@
 
 > A feature-rich ToDo and Notes application built with HTML, CSS, JavaScript, PHP, and MySQL database integration. Hosted on InfinityFree with custom authentication system.
 
-## 📸 Screenshots
+## ✦ Screenshots
 
 <div align="center">
 
-![Dashboard View](screenshots/img1.png "Dashboard View") | ![Notes View](screenshots/img2.png "Notes View") | ![Login View](screenshots/img3.png "Login View")
+![Dashboard View](images/img1.png "Dashboard View") | ![Notes View](images/img2.png "Notes View") | ![Login View](images/img3.png "Login View")
 ---|---|---
 Dashboard | Notes | Login
 
-![Todo List](screenshots/img4.png "Todo List") | ![Rich Text Editor](screenshots/img5.png "Rich Text Editor") | ![Mobile View](screenshots/img6.png "Mobile View")
+![Todo List](images/img4.png "Todo List") | ![Rich Text Editor](images/img5.png "Rich Text Editor") | ![Mobile View](images/img6.png "Mobile View")
 ---|---|---
 Todo List | Rich Text Editor | Mobile View
 
 </div>
 
-## ✨ Features
+## ✦ Features
 
 - **🔐 Secure Authentication**: Robust login and registration system with password hashing
 - **💾 Persistent Storage**: MySQL database for reliable data storage
@@ -36,7 +36,7 @@ Todo List | Rich Text Editor | Mobile View
 - **✨ Rich Text Editing**: Google Notes-like functionality empowered by Quill.js
 - **🚀 Deployed Solution**: Actively hosted on InfinityFree platform
 
-## 🛠️ Technologies Used
+## ✦ Technologies Used
 
 | Technology | Purpose |
 |------------|---------|
@@ -49,7 +49,7 @@ Todo List | Rich Text Editor | Mobile View
 | **InfinityFree** | Hosting platform |
 | **Git** | Version control |
 
-## 📁 Project Structure
+## ✦ Project Structure
 
 ```
 Tachyon-Todo-App/
@@ -82,7 +82,7 @@ Tachyon-Todo-App/
 └── README.md              # Documentation
 ```
 
-## 🚀 Quick Setup
+## ✦ Quick Setup
 
 ### Prerequisites
 - Web server with PHP support (Apache/Nginx)
@@ -164,11 +164,11 @@ Tachyon-Todo-App/
 5. **Access the Application**
    Navigate to your web server's document root in a browser
 
-## 🌐 Live Demo
+## ✦ Live Demo
 
 Experience Tachyon in action: [https://tachyon.rf.gd/](https://tachyon.rf.gd/)
 
-## 🛡️ Security Features
+## ✦ Security Features
 
 - Password hashing with PHP's `password_hash()`
 - Input sanitization to prevent XSS attacks
@@ -176,7 +176,7 @@ Experience Tachyon in action: [https://tachyon.rf.gd/](https://tachyon.rf.gd/)
 - Secure session management
 - Proper authentication checks on all protected pages
 
-## 🤝 Contributing
+## ✦ Contributing
 
 Contributions are welcome! Here's how you can contribute:
 
@@ -187,16 +187,16 @@ Contributions are welcome! Here's how you can contribute:
 5. Push to the branch (`git push origin feature/amazing-feature`)
 6. Open a Pull Request
 
-## 📄 License
+## ✦ License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 📞 Contact
+## ✦ Contact
 
 Tachyon ToDo Application
 - Hosted at: [https://tachyon.rf.gd/](https://tachyon.rf.gd/)
 - Built with ❤️ using modern web technologies
 
-## ⭐ Support
+## ✦ Support
 
 If you find this project helpful, please give it a star! It helps others discover the project and motivates continued development.
