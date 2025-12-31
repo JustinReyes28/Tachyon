@@ -15,13 +15,13 @@
 
 <div align="center">
 
-![Dashboard View](images/img1.png "Dashboard View") | ![Notes View](images/img2.png "Notes View") | ![Login View](images/img3.png "Login View")
+![Dashboard View](images/img1.png "Dashboard View") | ![Notes View](images/img2.png "Notes View") | ![Login View](images/img3.png "Reccuring Reminders")
 ---|---|---
-Dashboard | Notes | Login
+Dashboard | Notes | Reccuring Reminders
 
-![Todo List](images/img4.png "Todo List") | ![Rich Text Editor](images/img5.png "Rich Text Editor") | ![Mobile View](images/img6.png "Mobile View")
+![Todo List](images/img4.png "Profile View") | ![Rich Text Editor](images/img5.png "Profile Actions") | ![Mobile View](images/img6.png "Trash Can")
 ---|---|---
-Todo List | Rich Text Editor | Mobile View
+Profile View | Profile Actions | Trash Can
 
 </div>
 
