@@ -130,8 +130,11 @@ $page_description = "Capture todos and notes instantly with Tachyon. A fast, min
 
         <!-- Notes Section -->
         <section class="notes-section" id="notes-section" style="margin-top: var(--space-2xl);">
-            <h2 class="section-title">Guest Notes</h2>
-            <p class="mb-4" style="max-width: 520px;">
+            <div style="display: flex; align-items: center; gap: var(--space-sm);">
+                <h2 class="section-title" style="margin: 0;">Guest Notes</h2>
+                <button id="notes-info-toggle" class="info-btn" title="Toggle information">ℹ️</button>
+            </div>
+            <p class="mb-4" id="guest-notes-info" style="max-width: 520px; display: none;">
                 Quick notes for this device only. For rich notes, backups, and email features, use your account
                 dashboard.
             </p>
@@ -367,7 +370,7 @@ $page_description = "Capture todos and notes instantly with Tachyon. A fast, min
                 renderNotes(notes);
             });
 
-            // Info toggle button
+            // Info toggle button for Todos
             const infoToggle = document.getElementById('info-toggle');
             const guestTodosInfo = document.getElementById('guest-todos-info');
             
@@ -394,6 +397,37 @@ $page_description = "Capture todos and notes instantly with Tachyon. A fast, min
                         infoToggle.textContent = 'ℹ️';
                         infoToggle.title = 'Show information';
                         localStorage.setItem('guestTodosInfoHidden', 'true');
+                    }
+                });
+            }
+            
+            // Info toggle button for Notes
+            const notesInfoToggle = document.getElementById('notes-info-toggle');
+            const guestNotesInfo = document.getElementById('guest-notes-info');
+            
+            if (notesInfoToggle && guestNotesInfo) {
+                // Default to hidden, but check localStorage for user preference
+                const infoHidden = localStorage.getItem('guestNotesInfoHidden') !== 'false';
+                
+                if (infoHidden) {
+                    guestNotesInfo.style.display = 'none';
+                    notesInfoToggle.textContent = 'ℹ️';
+                    notesInfoToggle.title = 'Show information';
+                }
+                
+                notesInfoToggle.addEventListener('click', () => {
+                    const isHidden = guestNotesInfo.style.display === 'none';
+                    
+                    if (isHidden) {
+                        guestNotesInfo.style.display = 'block';
+                        notesInfoToggle.textContent = 'ℹ️';
+                        notesInfoToggle.title = 'Hide information';
+                        localStorage.setItem('guestNotesInfoHidden', 'false');
+                    } else {
+                        guestNotesInfo.style.display = 'none';
+                        notesInfoToggle.textContent = 'ℹ️';
+                        notesInfoToggle.title = 'Show information';
+                        localStorage.setItem('guestNotesInfoHidden', 'true');
                     }
                 });
             }
