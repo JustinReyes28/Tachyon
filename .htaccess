@@ -97,3 +97,30 @@ RewriteEngine On
     AddOutputFilterByType DEFLATE application/x-javascript
     AddOutputFilterByType DEFLATE image/svg+xml
 </IfModule>
+
+# =====================
+# VULNERABILITY MITIGATIONS
+# =====================
+# Mitigate CVE-2026-109618 & CVE-2026-109619
+<IfModule mod_php.c>
+    php_value session.upload_progress.enabled 0
+    php_value fatal_error_backtraces 0
+</IfModule>
+<IfModule mod_php7.c>
+    php_value session.upload_progress.enabled 0
+    php_value fatal_error_backtraces 0
+</IfModule>
+<IfModule mod_php8.c>
+    php_value session.upload_progress.enabled 0
+    php_value fatal_error_backtraces 0
+</IfModule>
+
+# Temporarily restrict untrusted multipart/form-data requests
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{CONTENT_TYPE} ^multipart/form-data [NC]
+    RewriteCond %{REQUEST_METHOD} POST
+    # Allow multipart/form-data only for the import endpoint which legitimately needs it
+    RewriteCond %{REQUEST_URI} !^/import_backup\.php$ [NC]
+    RewriteRule .* - [F,L]
+</IfModule>
